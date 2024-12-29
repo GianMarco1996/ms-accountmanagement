@@ -1,0 +1,796 @@
+openapi: 3.0.0
+info:
+  title: Gestión de cuentas
+  description: API para gestionar las cuentas de un cliente.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+tags:
+  - name: account
+    description: Todo sobre las cuentas asociadas a un cliente
+  - name: transaction
+    description: Todo sobre las transacciones de una cuenta
+  - name: product
+    description: Todo sobre los tipos de producto para las cuentas
+paths:
+  /account/list:
+    get:
+      tags:
+        - account
+      summary: Devuelve las cuentas de los clientes del banco
+      operationId: getAccounts
+      description: Obtiene las cuentas.
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccountResponse"
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /account/detail/{id}:
+    get:
+      tags:
+        - account
+      summary: Obtiene el detalle de una cuenta
+      operationId: getAccountDetail
+      description: Obtiene una cuenta con su detalle por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la cuenta
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDetailResponse"
+        "404":
+          description: "No se encontró la cuenta"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Cuenta no encontrada."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /account:
+    post:
+      tags:
+        - account
+      summary: Registra una cuenta de un cliente del banco
+      operationId: registerAccount
+      description: Crea una nueva cuenta de un cliente
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountRequest"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Se registro de forma exitosa."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /account/{id}:
+    get:
+      tags:
+        - account
+      summary: Obtiene una cuenta de un cliente del banco
+      operationId: getAccount
+      description: Obtiene una cuenta por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la cuenta
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountResponse"
+        "404":
+          description: "No se encontró la cuenta"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Cuenta no encontrada."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+    put:
+      tags:
+        - account
+      summary: Actualiza una cuenta de un cliente del banco
+      operationId: updateAccount
+      description: Actualiza una cuenta por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la cuenta
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountRequest"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Se actualizo de forma exitosa."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+    delete:
+      tags:
+        - account
+      summary: Elimina una cuenta de un cliente del banco
+      operationId: removeAccount
+      description: Elimina una cuenta por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la cuenta
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      responses:
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /transaction/list:
+    get:
+      tags:
+        - transaction
+      summary: Devuelve las transacciones de las cuentas de un cliente del banco
+      operationId: getTransactions
+      description: Obtiene las transacciones.
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransactionResponse"
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /transaction:
+    post:
+      tags:
+        - transaction
+      summary: Registra una transacción de una cuenta de un cliente del banco
+      operationId: registerTransaction
+      description: Crea una nueva transacción de un cliente
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionRequest"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Se registro de forma exitosa."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /transaction/{id}:
+    get:
+      tags:
+        - transaction
+      summary: Obtiene una transacción de una cuenta de un cliente del banco
+      operationId: getTransaction
+      description: Obtiene una transacción por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la transacción
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionResponse"
+        "404":
+          description: "No se encontró la transacción"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Transacción no encontrada."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+    put:
+      tags:
+        - transaction
+      summary: Actualiza una transacción de una cuenta de un cliente del banco
+      operationId: updateTransaction
+      description: Actualiza una transacción por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la transacción
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionRequest"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Se actualizo de forma exitosa."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+    delete:
+      tags:
+        - transaction
+      summary: Elimina una transacción de una cuenta de un cliente del banco
+      operationId: removeTransaction
+      description: Elimina una transacción por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la transacción
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      responses:
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /product/list:
+    get:
+      tags:
+        - product
+      summary: Devuelve los productos del banco
+      operationId: getProducts
+      description: Obtiene los productos.
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductResponse"
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /product:
+    post:
+      tags:
+        - product
+      summary: Registra un producto al banco
+      operationId: registerProduct
+      description: Crea un nuevo producto
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductRequest"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Se registro de forma exitosa."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  code:
+                    type: string
+                    example: "C500_001"
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /product/{id}:
+    get:
+      tags:
+        - product
+      summary: Obtiene un producto del banco
+      operationId: getProduct
+      description: Obtiene un producto por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del producto
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+        "404":
+          description: "No se encontró el producto"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Producto no encontrado."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+    put:
+      tags:
+        - product
+      summary: Actualiza un producto del banco
+      operationId: updateProduct
+      description: Actualiza un producto por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del producto
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductRequest"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Se actualizo de forma exitosa."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+    delete:
+      tags:
+        - product
+      summary: Elimina un producto del banco
+      operationId: removeProduct
+      description: Actualiza un producto por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del producto
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      responses:
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+components:
+  schemas:
+    AccountResponse:
+      type: object
+      properties:
+        id:
+          description: "Id de la cuenta"
+          type: string
+          example: "6764c17cb1fa3cd77d0644d8"
+        accountNumber:
+          description: "Numero de la cuenta"
+          type: string
+          example: "98745632112365478965"
+        currentBalance:
+          description: "Saldo actual de la cuenta"
+          type: number
+          format: double
+          example: 10000
+        openingDate:
+          description: "Fecha de apertura de la cuenta"
+          type: string
+          example: "21/12/2024"
+        accountStatus:
+          description: "Estado de la cuenta"
+          type: string
+          example: "Activa"
+        productId:
+          description: "Id del producto a la que pertenece la cuenta"
+          type: string
+          example: "6764c17cb1fa3cd77d0644d8"
+        customer:
+          type: object
+          properties:
+            id:
+              description: "Id del cliente de esta cuenta"
+              type: string
+              example: "6764c17cb1fa3cd77d0644d8"
+            type:
+              description: "Tipo de cliente de esta cuenta"
+              type: string
+              example: "Personal"
+    AccountDetailResponse:
+      type: object
+      properties:
+        id:
+          description: "Id de la cuenta"
+          type: string
+          example: "6764c17cb1fa3cd77d0644d8"
+        accountNumber:
+          description: "Numero de la cuenta"
+          type: string
+          example: "98745632112365478965"
+        currentBalance:
+          description: "Saldo actual de la cuenta"
+          type: number
+          format: double
+          example: 10000
+        openingDate:
+          description: "Fecha de apertura de la cuenta"
+          type: string
+          example: "21/12/2024"
+        accountStatus:
+          description: "Estado de la cuenta"
+          type: string
+          example: "Activa"
+        product:
+          $ref: '#/components/schemas/ProductResponse'
+        customer:
+          type: object
+          properties:
+            id:
+              description: "Id del cliente de esta cuenta"
+              type: string
+              example: "6764c17cb1fa3cd77d0644d8"
+            type:
+              description: "Tipo de cliente de esta cuenta"
+              type: string
+              example: "Personal"
+        transactions:
+          description: "Transacciones asociadas a esta cuenta"
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionResponse'
+    AccountRequest:
+      type: object
+      required:
+        - accountNumber
+        - currentBalance
+        - openingDate
+        - accountStatus
+        - productId
+        - customer
+      properties:
+        accountNumber:
+          description: "Numero de la cuenta"
+          type: string
+          example: "98745632112365478965"
+        currentBalance:
+          description: "Saldo actual de la cuenta"
+          type: number
+          format: double
+          example: 10000
+        openingDate:
+          description: "Fecha de apertura de la cuenta"
+          type: string
+          example: "21/12/2024"
+        accountStatus:
+          description: "Estado de la cuenta"
+          type: string
+          example: "Activa"
+        productId:
+          description: "Id del producto a la que pertenece la cuenta"
+          type: string
+          example: "6764c17cb1fa3cd77d0644d8"
+        customer:
+          type: object
+          properties:
+            id:
+              description: "Id del cliente de esta cuenta"
+              type: string
+              example: "6764c17cb1fa3cd77d0644d8"
+            type:
+              description: "Tipo de cliente de esta cuenta"
+              type: string
+              example: "Personal"
+    TransactionResponse:
+      type: object
+      properties:
+        id:
+          description: "Id de la transacción"
+          type: string
+          example: "6764c17cb1fa3cd77d0644d8"
+        category:
+          description: "Categoría de la transacción"
+          type: string
+          example: "Depósito"
+        type:
+          description: "Tipo de transacción"
+          type: string
+          example: "Movimiento"
+        accountId:
+          description: "Id de la cuenta de esta transacción"
+          type: string
+          example: "6764c17cb1fa3cd77d0644d8"
+        amount:
+          description: "Monto de la transacción"
+          type: number
+          format: double
+          example: 250
+        transactionDate:
+          description: "Fecha de la transacción"
+          type: string
+          example: "21/12/2024"
+        description:
+          description: "Descripción de la transacción"
+          type: string
+          example: "Se realiza depósito a la cuenta"
+    TransactionRequest:
+      type: object
+      required:
+        - type
+        - accountId
+        - amount
+        - transactionDate
+      properties:
+        category:
+          description: "Categoría de la transacción: para las cuentas bancarias Depósito(D), Retiro(R) y T.C Consumo(C)"
+          type: string
+          example: "D"
+          enum:
+            - D
+            - R
+            - C
+        type:
+          description: "Tipo de transacción: para cuentas bancarias y T.C Movimiento(M), para credito y T.C Pago(P)"
+          type: string
+          example: "M"
+          enum:
+            - M
+            - P
+        accountId:
+          description: "Id de la cuenta de esta transacción"
+          type: string
+          example: "6764c17cb1fa3cd77d0644d8"
+        amount:
+          description: "Monto de la transacción"
+          type: number
+          format: double
+          example: 250
+        transactionDate:
+          description: "Fecha de la transacción"
+          type: string
+          example: "21/12/2024"
+        description:
+          description: "Descripción de la transacción"
+          type: string
+          example: "Se realiza depósito de la cuenta"
+    ProductResponse:
+      type: object
+      properties:
+        id:
+          description: "Id del producto"
+          type: string
+          example: "6764c17cb1fa3cd77d0644d8"
+        name:
+          description: "Nombre del producto"
+          type: string
+          example: "Tarjeta crédito - Personal"
+        type:
+          description: "Tipo de producto: Pasivo(P), Activo(A)"
+          type: string
+          example: "Activo"
+        category:
+          description: "Categoria para el tipo de producto; para los Pasivos: Ahorro(A), Cuenta corriente(CC), Plazo fijo(PF) y para los Activos: Personal(P), Empresarial(E), Tarjeta crédito(TC)"
+          type: string
+          example: "Tarjeta crédito"
+        typeCreditCard:
+          description: "Tipo de tarjeta de crédito: Personal(P) y Empresarial(E)"
+          type: string
+          example: "Personal"
+        description:
+          description: "Descripción del producto"
+          type: string
+          example: "Cuenta bancaria"
+    ProductRequest:
+      type: object
+      required:
+        - category
+        - type
+      properties:
+        name:
+          description: "Nombre del producto"
+          type: string
+          example: "Tarjeta crédito - Personal"
+        type:
+          description: "Tipo de producto: Pasivo(P), Activo(A)"
+          type: string
+          example: "A"
+          enum:
+            - P
+            - A
+        category:
+          description: "Categoria para el tipo de producto; para los Pasivos: Ahorro(A), Cuenta corriente(CC), Plazo fijo(PF) y para los Activos: Personal(P), Empresarial(E), Tarjeta crédito(TC)"
+          type: string
+          example: "TC"
+          enum:
+            - A
+            - CC
+            - PF
+            - P
+            - E
+            - TC
+        typeCreditCard:
+          description: "Tipo de tarjeta de crédito: Personal(P) y Empresarial(E)"
+          type: string
+          example: "P"
+          enum:
+            - P
+            - E
+        description:
+          description: "Descripción del producto"
+          type: string
+          example: "Crédito"
