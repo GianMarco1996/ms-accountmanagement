@@ -10,12 +10,20 @@ import java.util.List;
 @Data
 public class AccountDTO {
     private String id;
+
     private String accountNumber;
+
     private Double currentBalance;
+
     private String openingDate;
+
     private String accountStatus;
+
     private String productId;
+
     private Product product;
+
     private Customer customer;
+
     private List<Transaction> transactions = new ArrayList<>();
 }

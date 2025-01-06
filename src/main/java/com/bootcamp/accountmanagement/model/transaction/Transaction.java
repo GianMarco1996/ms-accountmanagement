@@ -13,10 +13,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Transaction {
     @Id
     private String id;
+
     private String category;
+
     private String type;
+
     private String accountId;
+
     private Double amount;
+
     private String transactionDate;
+
     private String description;
 }

@@ -87,8 +87,9 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new IllegalArgumentException("Los pagos a un crédito o una tarjeta de crédito no pueden tener categoría");
             }
         } else {
-            if (transaction.getType().equals("Movimiento"))
+            if (transaction.getType().equals("Movimiento")) {
                 throw new IllegalArgumentException("Los movimientos tienen que tener una categoría");
+            }
         }
         return transaction;
     }

@@ -6,8 +6,12 @@ import reactor.core.publisher.Mono;
 
 public interface ProductService {
     Flux<Product> getProducts();
+
     Mono<Product> getProduct(String id);
+
     Mono<Product> registerProduct(Mono<Product> product);
+
     Mono<Product> updateProduct(String id, Mono<Product> product);
+
     Mono<Void> removeProduct(String id);
 }

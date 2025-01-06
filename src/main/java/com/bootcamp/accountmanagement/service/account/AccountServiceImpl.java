@@ -58,34 +58,10 @@ public class AccountServiceImpl implements AccountService {
         return account.flatMap(ac -> {
             Mono<Account> accountMono = Mono.empty();
             if (ac.getCustomer().getType().equals("Personal")) {
-                accountMono = productRepository.findById(ac.getProductId())
-                        .filter(product -> !(product.getCategory().equals("Empresarial") || (product.getCategory().equals("Tarjeta crédito") && product.getTypeCreditCard().equals("Empresarial"))))
-                        .switchIfEmpty(Mono.error(new Exception("Un cliente Personal no puede tener las siguientes cuentas: en Activo Cuentas Empresarial" +
-                                " ni tampoco una Tarjeta de crédito de tipo Empresarial")))
-                        .flatMap(product -> accountRepository.findAccountByCustomerId(ac.getCustomer().getId())
-                                .any(a -> ac.getProductId().equals(a.getProductId()))
-                                .flatMap(value ->
-                                        (value) ? Mono.just(product)
-                                                .filter(p -> !(product.getCategory().equals("Ahorro") || product.getCategory().equals("Cuenta corriente") || product.getCategory().equals("Personal")
-                                                        || (product.getCategory().equals("Tarjeta crédito") && product.getTypeCreditCard().equals("Personal"))))
-                                                .switchIfEmpty(Mono.error(new Exception("Ya existe una cuenta con el producto ".concat(product.getCategory()))))
-                                                .flatMap(p -> accountRepository.save(ac))
-                                                : accountRepository.save(ac)));
+                accountMono = registerAccountPersonal(ac);
             }
             if (ac.getCustomer().getType().equals("Empresarial")) {
-                accountMono = productRepository.findById(ac.getProductId())
-                        .filter(product -> !(product.getCategory().equals("Ahorro") || product.getCategory().equals("Plazo fijo")
-                                || product.getCategory().equals("Personal") || (product.getCategory().equals("Tarjeta crédito") && product.getTypeCreditCard().equals("Personal"))))
-                        .switchIfEmpty(Mono.error(new Exception("Un cliente Empresarial solo puede tener las siguientes cuentas: en Pasivo multiples Cuentas Corrientes," +
-                                " Activo multiples cuentas empresariales y una Tarjeta de crédito")))
-                        .flatMap(product -> accountRepository.findAccountByCustomerId(ac.getCustomer().getId())
-                                .any(a -> ac.getProductId().equals(a.getProductId()))
-                                .flatMap(value ->
-                                                (value) ? Mono.just(product)
-                                                        .filter(p -> !p.getCategory().equals("Tarjeta crédito"))
-                                                        .switchIfEmpty(Mono.error(new Exception("Esta cuenta ya posee una tarjeta de crédito")))
-                                                        .flatMap(p -> accountRepository.save(ac))
-                                                        : accountRepository.save(ac)));
+                accountMono = registerAccountBusiness(ac);
             }
             return accountMono;
         });
@@ -120,5 +96,37 @@ public class AccountServiceImpl implements AccountService {
                     return a;
                 })
                 .flatMap(accountRepository::save);
+    }
+
+    private Mono<Account> registerAccountPersonal(Account account) {
+        return productRepository.findById(account.getProductId())
+                .filter(product -> !(product.getCategory().equals("Empresarial") || (product.getCategory().equals("Tarjeta crédito") && product.getTypeCreditCard().equals("Empresarial"))))
+                .switchIfEmpty(Mono.error(new Exception("Un cliente Personal no puede tener las siguientes cuentas: en Activo Cuentas Empresarial" +
+                        " ni tampoco una Tarjeta de crédito de tipo Empresarial")))
+                .flatMap(product -> accountRepository.findAccountByCustomerId(account.getCustomer().getId())
+                        .any(a -> account.getProductId().equals(a.getProductId()))
+                        .flatMap(value ->
+                                (value) ? Mono.just(product)
+                                        .filter(p -> !(product.getCategory().equals("Ahorro") || product.getCategory().equals("Cuenta corriente") || product.getCategory().equals("Personal")
+                                                || (product.getCategory().equals("Tarjeta crédito") && product.getTypeCreditCard().equals("Personal"))))
+                                        .switchIfEmpty(Mono.error(new Exception("Ya existe una cuenta con el producto ".concat(product.getCategory()))))
+                                        .flatMap(p -> accountRepository.save(account))
+                                        : accountRepository.save(account)));
+    }
+
+    private Mono<Account> registerAccountBusiness(Account account) {
+        return productRepository.findById(account.getProductId())
+                .filter(product -> !(product.getCategory().equals("Ahorro") || product.getCategory().equals("Plazo fijo")
+                        || product.getCategory().equals("Personal") || (product.getCategory().equals("Tarjeta crédito") && product.getTypeCreditCard().equals("Personal"))))
+                .switchIfEmpty(Mono.error(new Exception("Un cliente Empresarial solo puede tener las siguientes cuentas: en Pasivo multiples Cuentas Corrientes," +
+                        " Activo multiples cuentas empresariales y una Tarjeta de crédito")))
+                .flatMap(product -> accountRepository.findAccountByCustomerId(account.getCustomer().getId())
+                        .any(a -> account.getProductId().equals(a.getProductId()))
+                        .flatMap(value ->
+                                (value) ? Mono.just(product)
+                                        .filter(p -> !p.getCategory().equals("Tarjeta crédito"))
+                                        .switchIfEmpty(Mono.error(new Exception("Esta cuenta ya posee una tarjeta de crédito")))
+                                        .flatMap(p -> accountRepository.save(account))
+                                        : accountRepository.save(account)));
     }
 }

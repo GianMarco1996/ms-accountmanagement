@@ -7,10 +7,16 @@ import reactor.core.publisher.Mono;
 
 public interface AccountService {
     Flux<Account> getAccounts();
+
     Mono<Account> getAccount(String id);
+
     Mono<AccountDTO> getAccountDetail(String id);
+
     Mono<Account> registerAccount(Mono<Account> account);
+
     Mono<Account> updateAccount(String id, Mono<Account> account);
+
     Mono<Void> removeAccount(String id);
+    
     Mono<Account> updateBalance(String id, double amount, boolean condition);
 }

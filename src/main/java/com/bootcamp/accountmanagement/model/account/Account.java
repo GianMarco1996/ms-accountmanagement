@@ -13,10 +13,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Account {
     @Id
     private String id;
+
     private String accountNumber;
+
     private String productId;
+
     private Double currentBalance;
+
     private String openingDate;
+
     private String accountStatus;
+
     private Customer customer;
 }

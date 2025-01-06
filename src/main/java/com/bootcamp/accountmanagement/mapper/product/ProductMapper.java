@@ -23,12 +23,26 @@ public class ProductMapper {
 
     public Product modelToDocument(ProductRequest model) {
         Product product = new Product();
-        String type = switch (model.getType()) {
+        product.setType(getType(model.getType()));
+        product.setCategory(getCategory(model.getCategory()));
+        if (product.getCategory().equals("Tarjeta crédito")) {
+            product.setTypeCreditCard(getTypeCreditCard(model.getTypeCreditCard()));
+        }
+        product.setDescription(model.getDescription());
+        product.setName(Objects.nonNull(model.getName()) ? model.getName()
+                : !product.getCategory().equals("Tarjeta crédito") ? product.getCategory() : product.getCategory().concat(" - ".concat(product.getTypeCreditCard())));
+        return product;
+    }
+
+    private String getType(ProductRequest.TypeEnum typeEnum) {
+        return switch (typeEnum) {
             case P -> "Pasivo";
             case A -> "Activo";
         };
-        product.setType(type);
-        String category = switch (model.getCategory()) {
+    }
+
+    private String getCategory(ProductRequest.CategoryEnum categoryEnum) {
+        return switch (categoryEnum) {
             case A -> "Ahorro";
             case CC -> "Cuenta corriente";
             case PF -> "Plazo fijo";
@@ -36,17 +50,12 @@ public class ProductMapper {
             case E -> "Empresarial";
             case TC -> "Tarjeta crédito";
         };
-        product.setCategory(category);
-        if (product.getCategory().equals("Tarjeta crédito")) {
-            String typeCreditCard = switch (model.getTypeCreditCard()) {
-                case P -> "Personal";
-                case E -> "Empresarial";
-            };
-            product.setTypeCreditCard(typeCreditCard);
-        }
-        product.setDescription(model.getDescription());
-        product.setName(Objects.nonNull(model.getName()) ? model.getName()
-                : !product.getCategory().equals("Tarjeta crédito") ? product.getCategory() : product.getCategory().concat(" - ".concat(product.getTypeCreditCard())));
-        return product;
+    }
+
+    private String getTypeCreditCard(ProductRequest.TypeCreditCardEnum typeCreditCardEnum) {
+        return switch (typeCreditCardEnum) {
+            case P -> "Personal";
+            case E -> "Empresarial";
+        };
     }
 }
