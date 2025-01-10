@@ -16,8 +16,11 @@ public class ProductMapper {
         product.setName(domain.getName());
         product.setType(domain.getType());
         product.setCategory(domain.getCategory());
-        product.setTypeCreditCard(domain.getTypeCreditCard());
+        product.setTypeCard(domain.getTypeCard());
         product.setDescription(domain.getDescription());
+        product.setMonthlyMovements(domain.getMonthlyMovements());
+        product.setCommissionMaintenance(domain.getCommissionMaintenance());
+        product.setMovementDay(domain.getMovementDay());
         return product;
     }
 
@@ -25,12 +28,15 @@ public class ProductMapper {
         Product product = new Product();
         product.setType(getType(model.getType()));
         product.setCategory(getCategory(model.getCategory()));
-        if (product.getCategory().equals("Tarjeta crédito")) {
-            product.setTypeCreditCard(getTypeCreditCard(model.getTypeCreditCard()));
+        if (product.getCategory().equals("Tarjeta crédito") || product.getCategory().equals("Tarjeta débito")) {
+            product.setTypeCard(getTypeCreditCard(model.getTypeCard()));
         }
         product.setDescription(model.getDescription());
         product.setName(Objects.nonNull(model.getName()) ? model.getName()
-                : !product.getCategory().equals("Tarjeta crédito") ? product.getCategory() : product.getCategory().concat(" - ".concat(product.getTypeCreditCard())));
+                : !(product.getCategory().equals("Tarjeta crédito") || product.getCategory().equals("Tarjeta débito")) ? product.getCategory() : product.getCategory().concat(" - ".concat(product.getTypeCard())));
+        product.setMonthlyMovements(model.getMonthlyMovements());
+        product.setCommissionMaintenance(model.getCommissionMaintenance());
+        product.setMovementDay(model.getMovementDay());
         return product;
     }
 
@@ -49,11 +55,12 @@ public class ProductMapper {
             case P -> "Personal";
             case E -> "Empresarial";
             case TC -> "Tarjeta crédito";
+            case TD -> "Tarjeta débito";
         };
     }
 
-    private String getTypeCreditCard(ProductRequest.TypeCreditCardEnum typeCreditCardEnum) {
-        return switch (typeCreditCardEnum) {
+    private String getTypeCreditCard(ProductRequest.TypeCardEnum typeCardEnum) {
+        return switch (typeCardEnum) {
             case P -> "Personal";
             case E -> "Empresarial";
         };

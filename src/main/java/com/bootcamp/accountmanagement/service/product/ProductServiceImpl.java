@@ -57,7 +57,7 @@ public class ProductServiceImpl implements ProductService {
                 throw new IllegalArgumentException("Los productos que son de tipo Activo solo pueden tener la" +
                         " categoría de: Personal(P), Empresarial(E), Tarjeta crédito(TC)");
             }
-            if (Objects.isNull(product.getTypeCreditCard()) && product.getCategory().equals("Tarjeta crédito")) {
+            if (Objects.isNull(product.getTypeCard()) && product.getCategory().equals("Tarjeta crédito")) {
                 throw new IllegalArgumentException("Los productos que son de tipo Activo y categoría Tarjeta crédito(TC)" +
                         " necesita enviar el tipo de tarjeta de crédito: Personal(P) y Empresarial(E)");
             }

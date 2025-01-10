@@ -20,7 +20,13 @@ public class Product {
 
     private String category;
 
-    private String typeCreditCard;
+    private String typeCard;
 
     private String description;
+
+    private Integer monthlyMovements;
+
+    private Double commissionMaintenance;
+
+    private Integer movementDay;
 }

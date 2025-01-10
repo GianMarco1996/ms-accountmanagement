@@ -2,6 +2,7 @@ package com.bootcamp.accountmanagement.controller.account;
 
 import com.bootcamp.accountmanagement.api.AccountApi;
 import com.bootcamp.accountmanagement.mapper.account.AcountMapper;
+import com.bootcamp.accountmanagement.model.AccountDebitCard;
 import com.bootcamp.accountmanagement.model.AccountDetailResponse;
 import com.bootcamp.accountmanagement.model.AccountRequest;
 import com.bootcamp.accountmanagement.model.AccountResponse;
@@ -24,6 +25,12 @@ public class AccountController implements AccountApi {
     private AcountMapper accountMapper;
 
     @Override
+    public Mono<ResponseEntity<Object>> associateDebitCard(String id, Mono<AccountDebitCard> accountDebitCard, ServerWebExchange exchange) {
+        return accountService.associateDebitCard(id, accountDebitCard)
+                .map(ResponseEntity::ok);
+    }
+
+    @Override
     public Mono<ResponseEntity<AccountResponse>> getAccount(String id, ServerWebExchange exchange) {
         return accountService.getAccount(id)
                 .map(account -> accountMapper.documentToModel(account))
@@ -31,15 +38,15 @@ public class AccountController implements AccountApi {
     }
 
     @Override
-    public Mono<ResponseEntity<AccountDetailResponse>> getAccountDetail(String id, ServerWebExchange exchange) {
-        return accountService.getAccountDetail(id)
+    public Mono<ResponseEntity<AccountDetailResponse>> getAccountTransactions(String id, ServerWebExchange exchange) {
+        return accountService.getAccountTransactions(id)
                 .map(account -> accountMapper.dtoToModel(account))
                 .map(ResponseEntity::ok);
     }
 
     @Override
-    public Mono<ResponseEntity<Flux<AccountResponse>>> getAccounts(ServerWebExchange exchange) {
-        return Mono.just(ResponseEntity.ok().body(accountService.getAccounts()
+    public Mono<ResponseEntity<Flux<AccountResponse>>> getAccounts(String customerId, ServerWebExchange exchange) {
+        return Mono.just(ResponseEntity.ok().body(accountService.getAccounts(customerId)
                 .map(account -> accountMapper.documentToModel(account))));
     }
 
@@ -48,7 +55,6 @@ public class AccountController implements AccountApi {
         return accountService.registerAccount(
                         accountRequest.map(account -> accountMapper.modelToDocument(account)))
                 .map(ResponseEntity::ok);
-                //.onErrorResume(Exception.class, e -> ResponseEntity.badRequest().body(e.getMessage()));
     }
 
     @Override
