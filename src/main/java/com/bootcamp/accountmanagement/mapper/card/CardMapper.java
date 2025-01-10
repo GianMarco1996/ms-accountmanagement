@@ -2,15 +2,14 @@ package com.bootcamp.accountmanagement.mapper.card;
 
 import com.bootcamp.accountmanagement.mapper.product.ProductMapper;
 import com.bootcamp.accountmanagement.mapper.transaction.TransactionMapper;
-import com.bootcamp.accountmanagement.model.CardDetailResponse;
-import com.bootcamp.accountmanagement.model.CardRequest;
-import com.bootcamp.accountmanagement.model.CardResponse;
-import com.bootcamp.accountmanagement.model.CardResponseCustomer;
+import com.bootcamp.accountmanagement.model.*;
 import com.bootcamp.accountmanagement.model.account.Customer;
 import com.bootcamp.accountmanagement.model.card.Card;
 import com.bootcamp.accountmanagement.model.card.CardDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 @Component
 public class CardMapper {
@@ -32,10 +31,14 @@ public class CardMapper {
         card.setCustomer(document.getCustomer());
         card.setTypeCurrency(document.getTypeCurrency());
         card.setCardStatus(document.getCardStatus());
-        card.setCreditLimit(document.getCreditLimit());
-        card.setCurrentBalance(document.getCurrentBalance());
-        card.setInterestRate(document.getInterestRate());
-        card.setMinimumPayment(document.getMinimumPayment());
+        if (Objects.nonNull(document.getCreditLimit())) {
+            card.setCreditLimit(document.getCreditLimit());
+            card.setCurrentBalance(document.getCurrentBalance());
+            card.setInterestRate(document.getInterestRate());
+            card.setUsedBalance(document.getCreditLimit() - document.getCurrentBalance());
+            card.setMinimumPayment(card.getUsedBalance() * (document.getInterestRate() * 3));
+            card.setPaymentDate(document.getPaymentDate());
+        }
         return card;
     }
 
@@ -56,7 +59,9 @@ public class CardMapper {
         card.setCreditLimit(dto.getCreditLimit());
         card.setCurrentBalance(dto.getCurrentBalance());
         card.setInterestRate(dto.getInterestRate());
+        card.setUsedBalance(dto.getUsedBalance());
         card.setMinimumPayment(dto.getMinimumPayment());
+        card.setPaymentDate(dto.getPaymentDate());
         card.setTransactions(
                 dto.getTransactions()
                         .stream()
@@ -83,7 +88,9 @@ public class CardMapper {
         card.setCreditLimit(dto.getCreditLimit());
         card.setCurrentBalance(dto.getCurrentBalance());
         card.setInterestRate(dto.getInterestRate());
+        card.setUsedBalance(dto.getUsedBalance());
         card.setMinimumPayment(dto.getMinimumPayment());
+        card.setPaymentDate(dto.getPaymentDate());
         return card;
     }
 
@@ -98,12 +105,12 @@ public class CardMapper {
         customer.setId(model.getCustomer().getId());
         customer.setType(model.getCustomer().getType());
         card.setCustomer(customer);
-        card.setTypeCurrency(model.getTypeCurrency());
+        card.setTypeCurrency(getTypeCurrency(model.getTypeCurrency()));
         card.setCardStatus(getCardStatus(model.getCardStatus()));
         card.setCreditLimit(model.getCreditLimit());
         card.setCurrentBalance(model.getCurrentBalance());
         card.setInterestRate(model.getInterestRate());
-        card.setMinimumPayment(model.getMinimumPayment());
+        card.setPaymentDate(model.getPaymentDate());
         card.setAccountId(model.getAccountId());
         return card;
     }
@@ -121,7 +128,7 @@ public class CardMapper {
         card.setCreditLimit(dto.getCreditLimit());
         card.setCurrentBalance(dto.getCurrentBalance());
         card.setInterestRate(dto.getInterestRate());
-        card.setMinimumPayment(dto.getMinimumPayment());
+        card.setPaymentDate(dto.getPaymentDate());
         return card;
     }
 
@@ -130,6 +137,13 @@ public class CardMapper {
             case A -> "Activa";
             case B -> "Bloqueada";
             case C -> "Caducada";
+        };
+    }
+
+    private String getTypeCurrency(CardRequest.TypeCurrencyEnum typeCurrencyEnum) {
+        return switch (typeCurrencyEnum) {
+            case PEN -> "Soles";
+            case USD -> "Dolares";
         };
     }
 }

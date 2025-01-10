@@ -37,5 +37,5 @@ public class Card {
 
     private Double interestRate;
 
-    private Double minimumPayment;
+    private Integer paymentDate;
 }

@@ -41,4 +41,8 @@ public class CardDTO {
     private List<Transaction> transactions = new ArrayList<>();
 
     private String accountId;
+
+    private Double usedBalance;
+
+    private Integer paymentDate;
 }

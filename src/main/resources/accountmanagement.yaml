@@ -15,6 +15,8 @@ tags:
     description: Todo sobre los tipos de producto que tiene el banco
   - name: card
     description: Todo sobre las tarjetas asociadas al banco
+  - name: credit
+    description: Todo sobre los créditos asociados al banco
 paths:
   /account/list:
     get:
@@ -764,6 +766,190 @@ paths:
                   message:
                     type: string
                     example: "Error en el servidor."
+  /credit/list:
+    get:
+      tags:
+        - credit
+      summary: Devuelve los créditos de los clientes del banco
+      operationId: getCredits
+      description: Obtiene los créditos.
+      parameters:
+        - name: customerId
+          in: query
+          description: Filtro para buscar créditos de un cliente
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CreditResponse"
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /credit:
+    post:
+      tags:
+        - credit
+      summary: Registra un crédito de un cliente del banco
+      operationId: registerCredit
+      description: Crea un nuevo crédito de un cliente
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreditRequest"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Se registro de forma exitosa."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /credit/{id}:
+    get:
+      tags:
+        - credit
+      summary: Obtiene un crédito de un cliente del banco
+      operationId: getCredit
+      description: Obtiene un crédito por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del crédito
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreditResponse"
+        "404":
+          description: "No se encontró el crédito"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Crédito no encontrado."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /credit/creditStatus/{id}:
+    put:
+      tags:
+        - credit
+      summary: Cambia el estado del crédito
+      operationId: updateCreditStatus
+      description: Actualiza el estado del crédito por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del crédito
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+        - name: creditStatus
+          description: "Indica el estado para: Activo(A), Pagado(P)"
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "A"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Se actualizo de forma exitosa."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /credit/creditTransactions/{id}:
+    get:
+      tags:
+        - credit
+      summary: Obtiene las transacciones de un crédito
+      operationId: getCreditTransactions
+      description: Obtiene un crédito con sus transacciones por ID del crédito
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del crédito
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreditDetailResponse"
+        "404":
+          description: "No se encontró el crédito"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Crédito no encontrado"
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
 components:
   schemas:
     AccountResponse:
@@ -1247,11 +1433,20 @@ components:
           type: number
           format: double
           example: 10000
+        usedBalance:
+          description: "Saldo usado de la tarjeta"
+          type: number
+          format: double
+          example: 5000
         interestRate:
           description: "Tasa de interes de la tarjeta"
           type: number
           format: double
           example: 10000
+        paymentDate:
+          description: "Día del mes en el que se paga la tarjeta"
+          type: integer
+          example: 15
         minimumPayment:
           description: "Pago minimo de la tarjeta"
           type: number
@@ -1301,9 +1496,12 @@ components:
               type: string
               example: "Personal"
         typeCurrency:
-          description: "Tipo de moneda"
+          description: "Tipo de moneda: Soles(PEN), Dolares(USD)"
           type: string
-          example: "Soles"
+          example: "PEN"
+          enum:
+            - PEN
+            - USD
         cardStatus:
           description: "Estado de la tarjeta: Activa(A), Bloqueada(B) y Caducada(C)"
           type: string
@@ -1327,11 +1525,10 @@ components:
           type: number
           format: double
           example: 10000
-        minimumPayment:
-          description: "Pago minimo de la tarjeta"
-          type: number
-          format: double
-          example: 100
+        paymentDate:
+          description: "Día del mes en el que se paga la tarjeta"
+          type: integer
+          example: 15
         accountId:
           description: "Id de la cuenta de esta tarjeta"
           type: string
@@ -1390,18 +1587,276 @@ components:
           type: number
           format: double
           example: 10000
+        usedBalance:
+          description: "Saldo usado de la tarjeta"
+          type: number
+          format: double
+          example: 5000
         interestRate:
           description: "Tasa de interes de la tarjeta"
           type: number
           format: double
           example: 10000
+        paymentDate:
+          description: "Día del mes en el que se paga la tarjeta"
+          type: integer
+          example: 15
         minimumPayment:
           description: "Pago minimo de la tarjeta"
           type: number
           format: double
           example: 100
         transactions:
-          description: "Transacciones asociadas a esta cuenta"
+          description: "Transacciones asociadas a esta tarjeta"
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionResponse'
+    CreditResponse:
+      type: object
+      properties:
+        id:
+          description: "Id del crédito"
+          type: string
+          example: "6764c17cb1fa3cd77d0644d8"
+        creditNumber:
+          description: "Numero del crédito"
+          type: string
+          example: "98745632112365478965"
+        creditAmount:
+          description: "Monto del crédito aprobado"
+          type: number
+          format: double
+          example: 10000
+        interestRate:
+          description: "Tasa de interes del crédito"
+          type: number
+          format: double
+          example: 0.2
+        totalToPay:
+          description: "Monto total a pagar del crédito: crédito aprobado + inteses"
+          type: number
+          format: double
+          example: 12000
+        pendingAmount:
+          description: "Monto pendiente por pagar del crédito aprobado"
+          type: number
+          format: double
+          example: 12000
+        loanTerm:
+          description: "Plazo del prestamos en meses"
+          type: integer
+          example: 24
+        quotaNumber:
+          description: "Número de cuotas"
+          type: integer
+          example: 24
+        quotaPaid:
+          description: "Cuotas pagadas"
+          type: integer
+          example: 0
+        quotaPending:
+          description: "Cuotas pendientes"
+          type: integer
+          example: 24
+        monthlyPayment:
+          description: "Pago mensual del crédito"
+          type: number
+          format: double
+          example: 500
+        creditStatus:
+          description: "Estado del crédito: Activo(A), Pagado(P)"
+          type: string
+          example: "Activo"
+        typeCurrency:
+          description: "Tipo de moneda"
+          type: string
+          example: "Soles"
+        openingDate:
+          description: "Fecha de apertura del crédito"
+          type: string
+          example: "21/12/2024"
+        expirationDate:
+          description: "Fecha de vencimiento del crédito"
+          type: string
+          example: "21/12/2026"
+        paymentDate:
+          description: "Día del mes en el que se paga la cuota del crédito"
+          type: integer
+          example: 15
+        customer:
+          type: object
+          properties:
+            id:
+              description: "Id del cliente de este crédito"
+              type: string
+              example: "6764c17cb1fa3cd77d0644d8"
+            type:
+              description: "Tipo de cliente de este crédito"
+              type: string
+              example: "Personal"
+        product:
+          $ref: '#/components/schemas/ProductResponse'
+    CreditRequest:
+      type: object
+      required:
+        - creditNumber
+        - creditAmount
+        - interestRate
+        - loanTerm
+        - creditStatus
+        - typeCurrency
+        - openingDate
+        - expirationDate
+        - paymentDate
+        - customer
+        - productId
+      properties:
+        creditNumber:
+          description: "Numero del crédito"
+          type: string
+          example: "98745632112365478965"
+        creditAmount:
+          description: "Monto del crédito aprobado"
+          type: number
+          format: double
+          example: 10000
+        interestRate:
+          description: "Tasa de interes del crédito"
+          type: number
+          format: double
+          example: 0.2
+        loanTerm:
+          description: "Plazo del prestamos en meses"
+          type: integer
+          example: 24
+        creditStatus:
+          description: "Estado del crédito: Activo(A), Pagado(P)"
+          type: string
+          example: "A"
+          enum:
+            - A
+            - P
+        typeCurrency:
+          description: "Tipo de moneda: Soles(PEN), Dolares(USD)"
+          type: string
+          example: "PEN"
+          enum:
+            - PEN
+            - USD
+        openingDate:
+          description: "Fecha de apertura del crédito"
+          type: string
+          example: "21/12/2024"
+        expirationDate:
+          description: "Fecha de vencimiento del crédito"
+          type: string
+          example: "21/12/2026"
+        paymentDate:
+          description: "Día del mes en el que se paga la cuota del crédito"
+          type: integer
+          example: 15
+        customer:
+          type: object
+          properties:
+            id:
+              description: "Id del cliente de este crédito"
+              type: string
+              example: "6764c17cb1fa3cd77d0644d8"
+            type:
+              description: "Tipo de cliente de este crédito"
+              type: string
+              example: "Personal"
+        productId:
+          description: "Id del producto a la que pertenece el crédito"
+          type: string
+          example: "6764c17cb1fa3cd77d0644d8"
+    CreditDetailResponse:
+      type: object
+      properties:
+        id:
+          description: "Id del crédito"
+          type: string
+          example: "6764c17cb1fa3cd77d0644d8"
+        creditNumber:
+          description: "Numero del crédito"
+          type: string
+          example: "98745632112365478965"
+        creditAmount:
+          description: "Monto del crédito aprobado"
+          type: number
+          format: double
+          example: 10000
+        interestRate:
+          description: "Tasa de interes del crédito"
+          type: number
+          format: double
+          example: 0.2
+        totalToPay:
+          description: "Monto total a pagar del crédito: crédito aprobado + inteses"
+          type: number
+          format: double
+          example: 12000
+        pendingAmount:
+          description: "Monto pendiente por pagar del crédito aprobado"
+          type: number
+          format: double
+          example: 12000
+        loanTerm:
+          description: "Plazo del prestamos en meses"
+          type: integer
+          example: 24
+        quotaNumber:
+          description: "Número de cuotas"
+          type: integer
+          example: 24
+        quotaPaid:
+          description: "Cuotas pagadas"
+          type: integer
+          example: 0
+        quotaPending:
+          description: "Cuotas pendientes"
+          type: integer
+          example: 24
+        monthlyPayment:
+          description: "Pago mensual del crédito"
+          type: number
+          format: double
+          example: 500
+        creditStatus:
+          description: "Estado del crédito: Activo(A), Pagado(P)"
+          type: string
+          example: "Activo"
+        typeCurrency:
+          description: "Tipo de moneda"
+          type: string
+          example: "Soles"
+        openingDate:
+          description: "Fecha de apertura del crédito"
+          type: string
+          example: "21/12/2024"
+        expirationDate:
+          description: "Fecha de vencimiento del crédito"
+          type: string
+          example: "21/12/2026"
+        paymentDate:
+          description: "Día del mes en el que se paga la cuota del crédito"
+          type: integer
+          example: 15
+        customer:
+          type: object
+          properties:
+            id:
+              description: "Id del cliente de este crédito"
+              type: string
+              example: "6764c17cb1fa3cd77d0644d8"
+            type:
+              description: "Tipo de cliente de este crédito"
+              type: string
+              example: "Personal"
+        product:
+          $ref: '#/components/schemas/ProductResponse'
+        transactions:
+          description: "Transacciones asociadas a este crédito"
           type: array
           items:
             $ref: '#/components/schemas/TransactionResponse'
