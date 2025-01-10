@@ -8,11 +8,13 @@ servers:
     description: Servidor local
 tags:
   - name: account
-    description: Todo sobre las cuentas asociadas a un cliente
+    description: Todo sobre las cuentas bancarias asociadas a un cliente
   - name: transaction
-    description: Todo sobre las transacciones de una cuenta
+    description: Todo sobre las transacciones de una cuenta bancaria, crédito, tarjeta de crédito, monedero
   - name: product
-    description: Todo sobre los tipos de producto para las cuentas
+    description: Todo sobre los tipos de producto que tiene el banco
+  - name: card
+    description: Todo sobre las tarjetas asociadas al banco
 paths:
   /account/list:
     get:
@@ -577,6 +579,191 @@ paths:
                   message:
                     type: string
                     example: "Error en el servidor."
+  /card/list:
+    get:
+      tags:
+        - card
+      summary: Devuelve las tarjetas de los clientes del banco
+      operationId: getCards
+      description: Obtiene las tarjetas.
+      parameters:
+        - name: cardType
+          description: "Indica el tipo de tarjeta para poder filtrar: T: Todos, TC: Tarjeta de Crédito, TD: Tarjeta de Débito"
+          in: query
+          required: true
+          schema:
+            type: string
+            default: "T"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CardResponse"
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /card:
+    post:
+      tags:
+        - card
+      summary: Registra una tarjeta de un cliente del banco
+      operationId: registerCard
+      description: Crea una nueva tarjeta de un cliente
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CardRequest"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Se registro de forma exitosa."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /card/{id}:
+    get:
+      tags:
+        - card
+      summary: Obtiene una tarjeta de un cliente del banco
+      operationId: getCard
+      description: Obtiene una tarjeta por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la tarjeta
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardResponse"
+        "404":
+          description: "No se encontró la cuenta"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Cuenta no encontrada."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /card/cardStatus/{id}:
+    put:
+      tags:
+        - card
+      summary: Cambia el estado de la tarjeta
+      operationId: updateCardStatus
+      description: Actualiza el estado de una tarjeta por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la tarjeta
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+        - name: cardStatus
+          description: "Indica el estado para: Activa(A), Bloqueada(B) y Caducada(C)"
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "A"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Se actualizo de forma exitosa."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+  /card/cardTransactions/{id}:
+    get:
+      tags:
+        - card
+      summary: Obtiene las transacciones de una tarjeta
+      operationId: getCardTransactions
+      description: Obtiene una tarjeta con sus transacciones por ID de la tarjeta
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la tarjeta
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardDetailResponse"
+        "404":
+          description: "No se encontró la tarjeta"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Tarjeta no encontrada"
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
 components:
   schemas:
     AccountResponse:
@@ -1006,3 +1193,215 @@ components:
           description: "Día del movimiento para el Plazo Fijo"
           type: integer
           example: 30
+    CardResponse:
+      type: object
+      properties:
+        id:
+          description: "Id de la tarjeta"
+          type: string
+          example: "6764c17cb1fa3cd77d0644d8"
+        cardNumber:
+          description: "Numero de la tarjeta"
+          type: string
+          example: "98745632112365478965"
+        cvv:
+          description: "Código de seguridad de la tarjeta"
+          type: integer
+          example: 321
+        openingDate:
+          description: "Fecha de apertura de la tarjeta"
+          type: string
+          example: "21/12/2024"
+        expirationDate:
+          description: "Fecha de vencimiento de la tarjeta"
+          type: string
+          example: "21/12/2029"
+        product:
+          $ref: '#/components/schemas/ProductResponse'
+        customer:
+          type: object
+          properties:
+            id:
+              description: "Id del cliente de esta tarjeta"
+              type: string
+              example: "6764c17cb1fa3cd77d0644d8"
+            type:
+              description: "Tipo de cliente de esta tarjeta"
+              type: string
+              example: "Personal"
+        typeCurrency:
+          description: "Tipo de moneda"
+          type: string
+          example: "Soles"
+        cardStatus:
+          description: "Estado de la tarjeta: Activa(A), Bloqueada(B) y Caducada(C)"
+          type: string
+          example: "Activa"
+        creditLimit:
+          description: "Limite de crédito de la tarjeta"
+          type: number
+          format: double
+          example: 10000
+        currentBalance:
+          description: "Saldo actual de la tarjeta"
+          type: number
+          format: double
+          example: 10000
+        interestRate:
+          description: "Tasa de interes de la tarjeta"
+          type: number
+          format: double
+          example: 10000
+        minimumPayment:
+          description: "Pago minimo de la tarjeta"
+          type: number
+          format: double
+          example: 100
+    CardRequest:
+      type: object
+      required:
+        - cardNumber
+        - cvv
+        - openingDate
+        - expirationDate
+        - productId
+        - customer
+        - typeCurrency
+        - cardStatus
+      properties:
+        cardNumber:
+          description: "Numero de la tarjeta"
+          type: string
+          example: "98745632112365478965"
+        cvv:
+          description: "Código de seguridad de la tarjeta"
+          type: integer
+          example: 321
+        openingDate:
+          description: "Fecha de apertura de la tarjeta"
+          type: string
+          example: "21/12/2024"
+        expirationDate:
+          description: "Fecha de vencimiento de la tarjeta"
+          type: string
+          example: "21/12/2029"
+        productId:
+          description: "Id del producto a la que pertenece la tarjeta"
+          type: string
+          example: "6764c17cb1fa3cd77d0644d8"
+        customer:
+          type: object
+          properties:
+            id:
+              description: "Id del cliente de esta tarjeta"
+              type: string
+              example: "6764c17cb1fa3cd77d0644d8"
+            type:
+              description: "Tipo de cliente de esta tarjeta"
+              type: string
+              example: "Personal"
+        typeCurrency:
+          description: "Tipo de moneda"
+          type: string
+          example: "Soles"
+        cardStatus:
+          description: "Estado de la tarjeta: Activa(A), Bloqueada(B) y Caducada(C)"
+          type: string
+          example: "A"
+          enum:
+            - A
+            - B
+            - C
+        creditLimit:
+          description: "Limite de crédito de la tarjeta"
+          type: number
+          format: double
+          example: 10000
+        currentBalance:
+          description: "Saldo actual de la tarjeta"
+          type: number
+          format: double
+          example: 10000
+        interestRate:
+          description: "Tasa de interes de la tarjeta"
+          type: number
+          format: double
+          example: 10000
+        minimumPayment:
+          description: "Pago minimo de la tarjeta"
+          type: number
+          format: double
+          example: 100
+        accountId:
+          description: "Id de la cuenta de esta tarjeta"
+          type: string
+          example: "6764c17cb1fa3cd77d0644d8"
+    CardDetailResponse:
+      type: object
+      properties:
+        id:
+          description: "Id de la tarjeta"
+          type: string
+          example: "6764c17cb1fa3cd77d0644d8"
+        cardNumber:
+          description: "Numero de la tarjeta"
+          type: string
+          example: "98745632112365478965"
+        cvv:
+          description: "Código de seguridad de la tarjeta"
+          type: integer
+          example: 321
+        openingDate:
+          description: "Fecha de apertura de la tarjeta"
+          type: string
+          example: "21/12/2024"
+        expirationDate:
+          description: "Fecha de vencimiento de la tarjeta"
+          type: string
+          example: "21/12/2029"
+        product:
+          $ref: '#/components/schemas/ProductResponse'
+        customer:
+          type: object
+          properties:
+            id:
+              description: "Id del cliente de esta tarjeta"
+              type: string
+              example: "6764c17cb1fa3cd77d0644d8"
+            type:
+              description: "Tipo de cliente de esta tarjeta"
+              type: string
+              example: "Personal"
+        typeCurrency:
+          description: "Tipo de moneda"
+          type: string
+          example: "Soles"
+        cardStatus:
+          description: "Estado de la tarjeta: Activa(A), Bloqueada(B) y Caducada(C)"
+          type: string
+          example: "Activa"
+        creditLimit:
+          description: "Limite de crédito de la tarjeta"
+          type: number
+          format: double
+          example: 10000
+        currentBalance:
+          description: "Saldo actual de la tarjeta"
+          type: number
+          format: double
+          example: 10000
+        interestRate:
+          description: "Tasa de interes de la tarjeta"
+          type: number
+          format: double
+          example: 10000
+        minimumPayment:
+          description: "Pago minimo de la tarjeta"
+          type: number
+          format: double
+          example: 100
+        transactions:
+          description: "Transacciones asociadas a esta cuenta"
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionResponse'
