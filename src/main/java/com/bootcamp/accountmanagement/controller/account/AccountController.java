@@ -2,10 +2,7 @@ package com.bootcamp.accountmanagement.controller.account;
 
 import com.bootcamp.accountmanagement.api.AccountApi;
 import com.bootcamp.accountmanagement.mapper.account.AcountMapper;
-import com.bootcamp.accountmanagement.model.AccountDebitCard;
-import com.bootcamp.accountmanagement.model.AccountDetailResponse;
-import com.bootcamp.accountmanagement.model.AccountRequest;
-import com.bootcamp.accountmanagement.model.AccountResponse;
+import com.bootcamp.accountmanagement.model.*;
 import com.bootcamp.accountmanagement.service.account.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +56,12 @@ public class AccountController implements AccountApi {
     @Override
     public Mono<ResponseEntity<Object>> updateAccountStatus(String id, String accountStatus, ServerWebExchange exchange) {
         return accountService.updateAccountStatus(id, accountStatus)
+                .map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<Object>> bankTransfers(String id, Mono<BankTransfers> bankTransfers, ServerWebExchange exchange) {
+        return accountService.bankTransfers(id, bankTransfers)
                 .map(ResponseEntity::ok);
     }
 }

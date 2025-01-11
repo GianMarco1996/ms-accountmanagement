@@ -241,6 +241,47 @@ paths:
                   message:
                     type: string
                     example: "Error en el servidor."
+
+  /account/bankTransfers/{id}:
+    put:
+      tags:
+        - account
+      summary: Registra el envío y recepción del dinero en una transferencia bancaria
+      operationId: bankTransfers
+      description: Registra el envío y recepción del dinero a las cuentas bancarias origen y destino respectivamente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Id de la cuenta bancaria que realizara la transferencia origen
+          schema:
+            type: string
+            example: "6764c17cb1fa3cd77d0644d8"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BankTransfers"
+      responses:
+        "200":
+          description: "Operación finalizada correctamente"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Se registro de forma exitosa."
+        "500":
+          description: "Errores técnicos"
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Error en el servidor."
+
   /transaction/list:
     get:
       tags:
@@ -978,7 +1019,7 @@ components:
             - A
             - I
         typeCurrency:
-          description: "Tipo de moneda: Soles(PEN), Dolares(USD)"
+          description: "Tipo de moneda: Soles(PEN), Dólares(USD)"
           type: string
           example: "PEN"
           enum:
@@ -1062,7 +1103,7 @@ components:
             - R
             - C
         type:
-          description: "Tipo de transacción: para cuentas bancarias y T.C Movimiento(M), para credito y T.C Pago(P)"
+          description: "Tipo de transacción: para cuentas bancarias y T.C Movimiento(M), para crédito y T.C Pago(P)"
           type: string
           example: "M"
           enum:
@@ -1143,7 +1184,7 @@ components:
             - P
             - A
         category:
-          description: "Categoria para el tipo de producto; para los Pasivos: Ahorro(A), Cuenta corriente(CC), Plazo fijo(PF), Tarjeta débito(TD) y para los Activos: Personal(P), Empresarial(E), Tarjeta crédito(TC)"
+          description: "Categoría para el tipo de producto; para los Pasivos: Ahorro(A), Cuenta corriente(CC), Plazo fijo(PF), Tarjeta débito(TD) y para los Activos: Personal(P), Empresarial(E), Tarjeta crédito(TC)"
           type: string
           example: "TC"
           enum:
@@ -1238,7 +1279,7 @@ components:
           format: double
           example: 5000
         interestRate:
-          description: "Tasa de interes de la tarjeta"
+          description: "Tasa de interés de la tarjeta"
           type: number
           format: double
           example: 10000
@@ -1247,7 +1288,7 @@ components:
           type: integer
           example: 15
         minimumPayment:
-          description: "Pago minimo de la tarjeta"
+          description: "Pago mínimo de la tarjeta"
           type: number
           format: double
           example: 100
@@ -1298,7 +1339,7 @@ components:
                 - P
                 - E
         typeCurrency:
-          description: "Tipo de moneda: Soles(PEN), Dolares(USD)"
+          description: "Tipo de moneda: Soles(PEN), Dólares(USD)"
           type: string
           example: "PEN"
           enum:
@@ -1430,12 +1471,12 @@ components:
           format: double
           example: 10000
         interestRate:
-          description: "Tasa de interes del crédito"
+          description: "Tasa de interés del crédito"
           type: number
           format: double
           example: 0.2
         totalToPay:
-          description: "Monto total a pagar del crédito: crédito aprobado + inteses"
+          description: "Monto total a pagar del crédito: crédito aprobado + interés"
           type: number
           format: double
           example: 12000
@@ -1539,7 +1580,7 @@ components:
             - A
             - P
         typeCurrency:
-          description: "Tipo de moneda: Soles(PEN), Dolares(USD)"
+          description: "Tipo de moneda: Soles(PEN), Dólares(USD)"
           type: string
           example: "PEN"
           enum:
@@ -1592,12 +1633,12 @@ components:
           format: double
           example: 10000
         interestRate:
-          description: "Tasa de interes del crédito"
+          description: "Tasa de interés del crédito"
           type: number
           format: double
           example: 0.2
         totalToPay:
-          description: "Monto total a pagar del crédito: crédito aprobado + inteses"
+          description: "Monto total a pagar del crédito: crédito aprobado + interés"
           type: number
           format: double
           example: 12000
@@ -1665,3 +1706,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TransactionResponse'
+    BankTransfers:
+      type: object
+      properties:
+        accountNumber:
+          description: "Numero de la cuenta bancaria destino quien recibirá la transferencia"
+          type: string
+          example: "98745632112365478965"
+        amount:
+          description: "Monto a transferir"
+          type: number
+          format: double
+          example: 100

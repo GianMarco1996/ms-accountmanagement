@@ -1,6 +1,7 @@
 package com.bootcamp.accountmanagement.service.account;
 
 import com.bootcamp.accountmanagement.model.AccountDebitCard;
+import com.bootcamp.accountmanagement.model.BankTransfers;
 import com.bootcamp.accountmanagement.model.account.Account;
 import com.bootcamp.accountmanagement.model.account.AccountDTO;
 import reactor.core.publisher.Flux;
@@ -20,4 +21,6 @@ public interface AccountService {
     Mono<Account> associateDebitCard(String id, Mono<AccountDebitCard> accountDebitCard);
 
     Mono<String> updateAccountStatus(String id, String status);
+
+    Mono<String> bankTransfers(String id, Mono<BankTransfers> bankTransfers);
 }

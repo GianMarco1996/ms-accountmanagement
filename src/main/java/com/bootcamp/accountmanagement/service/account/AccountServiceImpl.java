@@ -2,10 +2,12 @@ package com.bootcamp.accountmanagement.service.account;
 
 import com.bootcamp.accountmanagement.mapper.account.AcountMapper;
 import com.bootcamp.accountmanagement.model.AccountDebitCard;
+import com.bootcamp.accountmanagement.model.BankTransfers;
 import com.bootcamp.accountmanagement.model.account.Account;
 import com.bootcamp.accountmanagement.model.account.AccountDTO;
 import com.bootcamp.accountmanagement.model.account.DebiCard;
 import com.bootcamp.accountmanagement.model.product.Product;
+import com.bootcamp.accountmanagement.model.transaction.Transaction;
 import com.bootcamp.accountmanagement.repository.account.AccountRepository;
 import com.bootcamp.accountmanagement.repository.product.ProductRepository;
 import com.bootcamp.accountmanagement.repository.transaction.TransactionRepository;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Service
@@ -138,6 +141,50 @@ public class AccountServiceImpl implements AccountService {
                                 ? Mono.just("Su cuenta bancaria fue activada exitosamente")
                                 : Mono.just("Su cuenta bancaria fue desactivada"))
                 );
+    }
+
+    @Override
+    public Mono<String> bankTransfers(String id, Mono<BankTransfers> bankTransfers) {
+        return bankTransfers.flatMap(bt -> accountRepository.findById(id)
+                .flatMap(account -> {
+                    if (account.getCurrentBalance() < bt.getAmount()) {
+                        throw new IllegalArgumentException("No tiene saldo suficiente para realizar la operación.");
+                    }
+                    account.setCurrentBalance(account.getCurrentBalance() - bt.getAmount());
+                    return accountRepository.save(account)
+                            .flatMap(acc -> {
+                                Transaction transaction = new Transaction();
+                                transaction.setCategory("Transferencia");
+                                transaction.setType("Movimiento");
+                                transaction.setAccountId(account.getId());
+                                transaction.setAmount(bt.getAmount());
+                                transaction.setTransactionDate(LocalDate.now().toString());
+                                transaction.setDescription("Transferencia realizada");
+                                return transactionRepository.save(transaction)
+                                        .map(savedTransaction -> acc);
+                            });
+                })
+                .flatMap(account -> accountRepository.findAccountByAccountNumber(bt.getAccountNumber())
+                        .flatMap(acc -> {
+                            acc.setCurrentBalance(acc.getCurrentBalance() + bt.getAmount());
+                            return accountRepository.save(acc)
+                                    .flatMap(a -> {
+                                        Transaction transaction = new Transaction();
+                                        transaction.setCategory("Transferencia");
+                                        transaction.setType("Movimiento");
+                                        transaction.setAccountId(acc.getId());
+                                        transaction.setAmount(bt.getAmount());
+                                        transaction.setTransactionDate(LocalDate.now().toString());
+                                        transaction.setDescription("Transferencia recibida");
+                                        return transactionRepository.save(transaction)
+                                                .map(savedTransaction -> a);
+                                    });
+                        })
+                )
+
+
+
+        ).flatMap(wallet -> Mono.just("Se realizo la transferencia correctamente"));
     }
 
     private Mono<Account> registerAccountPersonal(Account account, Product product) {
