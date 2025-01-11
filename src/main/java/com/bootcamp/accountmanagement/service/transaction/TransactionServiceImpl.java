@@ -25,24 +25,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Mono<Transaction> getTransaction(String id) {
-        return transactionRepository.findById(id);
-    }
-
-    @Override
     public Mono<Transaction> registerTransaction(Mono<Transaction> transaction) {
-        /*return transaction.flatMap(t -> {
-            Mono<Transaction> transactionMono = Mono.empty();
-            if (t.getCategory().equals("Depósito")) {
-                transactionMono = accountService.updateBalance(t.getAccountId(), t.getAmount(), true)
-                        .flatMap(a -> transactionRepository.save(t));
-            }
-            if (t.getCategory().equals("Retiro")) {
-                transactionMono = accountService.updateBalance(t.getAccountId(), t.getAmount(), false)
-                        .flatMap(a -> transactionRepository.save(t));
-            }
-            return transactionMono;
-        });*/
         return transaction.map(this::validateTransactionCategoryAndTypeForTheAccount)
                 .flatMap(t -> {
             Mono<Transaction> transactionMono = Mono.empty();
@@ -63,19 +46,6 @@ public class TransactionServiceImpl implements TransactionService {
             }
             return transactionMono;
         });
-    }
-
-    @Override
-    public Mono<Transaction> updateTransaction(String id, Mono<Transaction> transaction) {
-        return transactionRepository.findById(id)
-                .flatMap(t -> transaction)
-                .doOnNext(e -> e.setId(id))
-                .flatMap(transactionRepository::save);
-    }
-
-    @Override
-    public Mono<Void> removeTransaction(String id) {
-        return transactionRepository.deleteById(id);
     }
 
     private Transaction validateTransactionCategoryAndTypeForTheAccount(Transaction transaction) {
