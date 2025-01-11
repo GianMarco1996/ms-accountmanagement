@@ -11,4 +11,6 @@ public class DebiCard {
     private String id;
 
     private Boolean mainAccount;
+
+    private Integer order;
 }

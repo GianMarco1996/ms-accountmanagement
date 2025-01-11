@@ -16,29 +16,17 @@ public class Account {
 
     private String accountNumber;
 
-    private String productId;
-
     private Double currentBalance;
 
     private String openingDate;
 
     private String accountStatus;
 
-    private Customer customer;
-
     private String typeCurrency;
 
+    private Customer customer;
+
+    private String productId;
+
     private DebiCard debitCard;
-
-    private Double amountApproved;
-
-    private Double interestRate;
-
-    private Integer quotas;
-
-    private String paymentDate;
-
-    private Double creditLimit;
-
-    private String expirationDate;
 }

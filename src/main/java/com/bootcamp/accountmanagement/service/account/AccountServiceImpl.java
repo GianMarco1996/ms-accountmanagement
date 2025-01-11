@@ -5,6 +5,7 @@ import com.bootcamp.accountmanagement.model.AccountDebitCard;
 import com.bootcamp.accountmanagement.model.account.Account;
 import com.bootcamp.accountmanagement.model.account.AccountDTO;
 import com.bootcamp.accountmanagement.model.account.DebiCard;
+import com.bootcamp.accountmanagement.model.product.Product;
 import com.bootcamp.accountmanagement.repository.account.AccountRepository;
 import com.bootcamp.accountmanagement.repository.product.ProductRepository;
 import com.bootcamp.accountmanagement.repository.transaction.TransactionRepository;
@@ -75,16 +76,19 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Mono<Account> registerAccount(Mono<Account> account) {
-        return account.flatMap(ac -> {
-            Mono<Account> accountMono = Mono.empty();
-            if (ac.getCustomer().getType().equals("Personal")) {
-                accountMono = registerAccountPersonal(ac);
-            }
-            if (ac.getCustomer().getType().equals("Empresarial")) {
-                accountMono = registerAccountBusiness(ac);
-            }
-            return accountMono;
-        });
+        return account.flatMap(a -> productRepository.findById(a.getProductId())
+                .filter(p -> p.getCategory().equals("Ahorro") || p.getCategory().equals("Cuenta corriente") || p.getCategory().equals("Plazo fijo"))
+                .switchIfEmpty(Mono.error(new Exception("El id del producto no pertenece a una cuenta bancaria")))
+                .flatMap(p -> {
+                    Mono<Account> accountMono = Mono.empty();
+                    if (a.getCustomer().getType().equals("Personal")) {
+                        accountMono = registerAccountPersonal(a, p);
+                    } else {
+                        accountMono = registerAccountBusiness(a, p);
+                    }
+                    return accountMono;
+                })
+        );
     }
 
     @Override
@@ -126,36 +130,23 @@ public class AccountServiceImpl implements AccountService {
                 .flatMap(accountRepository::save);
     }
 
-    private Mono<Account> registerAccountPersonal(Account account) {
-        return productRepository.findById(account.getProductId())
-                .filter(product -> !(product.getCategory().equals("Empresarial") || (product.getCategory().equals("Tarjeta crédito") && product.getTypeCard().equals("Empresarial"))))
-                .switchIfEmpty(Mono.error(new Exception("Un cliente Personal no puede tener las siguientes cuentas: en Activo Cuentas Empresarial" +
-                        " ni tampoco una Tarjeta de crédito de tipo Empresarial")))
-                .flatMap(product -> accountRepository.findAccountByCustomerId(account.getCustomer().getId())
-                        .any(a -> account.getProductId().equals(a.getProductId()))
+    private Mono<Account> registerAccountPersonal(Account account, Product product) {
+        return Mono.just(account)
+                .flatMap(acc -> accountRepository.findAccountByCustomerId(acc.getCustomer().getId())
+                        .any(ac -> acc.getProductId().equals(ac.getProductId()))
                         .flatMap(value ->
                                 (value) ? Mono.just(product)
-                                        .filter(p -> !(product.getCategory().equals("Ahorro") || product.getCategory().equals("Cuenta corriente") || product.getCategory().equals("Personal")
-                                                || (product.getCategory().equals("Tarjeta crédito") && product.getTypeCard().equals("Personal"))))
-                                        .switchIfEmpty(Mono.error(new Exception("Ya existe una cuenta con el producto ".concat(product.getCategory()))))
-                                        .flatMap(p -> accountRepository.save(account))
-                                        : accountRepository.save(account)));
+                                            .filter(p -> !(product.getCategory().equals("Ahorro") || product.getCategory().equals("Cuenta corriente")))
+                                            .switchIfEmpty(Mono.error(new Exception("El cliente de tipo Persona ya cuenta con una cuenta bancaria de categoría ".concat(product.getCategory()))))
+                                            .flatMap(p -> accountRepository.save(acc))
+                                        : accountRepository.save(acc)));
     }
 
-    private Mono<Account> registerAccountBusiness(Account account) {
-        return productRepository.findById(account.getProductId())
-                .filter(product -> !(product.getCategory().equals("Ahorro") || product.getCategory().equals("Plazo fijo")
-                        || product.getCategory().equals("Personal") || (product.getCategory().equals("Tarjeta crédito") && product.getTypeCard().equals("Personal"))))
-                .switchIfEmpty(Mono.error(new Exception("Un cliente Empresarial solo puede tener las siguientes cuentas: en Pasivo multiples Cuentas Corrientes," +
-                        " Activo multiples cuentas empresariales y una Tarjeta de crédito")))
-                .flatMap(product -> accountRepository.findAccountByCustomerId(account.getCustomer().getId())
-                        .any(a -> account.getProductId().equals(a.getProductId()))
-                        .flatMap(value ->
-                                (value) ? Mono.just(product)
-                                        .filter(p -> !p.getCategory().equals("Tarjeta crédito"))
-                                        .switchIfEmpty(Mono.error(new Exception("Esta cuenta ya posee una tarjeta de crédito")))
-                                        .flatMap(p -> accountRepository.save(account))
-                                        : accountRepository.save(account)));
+    private Mono<Account> registerAccountBusiness(Account account, Product product) {
+        return Mono.just(account)
+                .filter(acc -> !(product.getCategory().equals("Ahorro") || product.getCategory().equals("Plazo fijo")))
+                .switchIfEmpty(Mono.error(new Exception("El cliente de tipo Empresarial no puede tener cuenta bancaria de categoría ".concat(product.getCategory()))))
+                .flatMap(accountRepository::save);
     }
 
     private Mono<Account> updateDebitCard(Account account, Mono<AccountDebitCard> accountDebitCard) {

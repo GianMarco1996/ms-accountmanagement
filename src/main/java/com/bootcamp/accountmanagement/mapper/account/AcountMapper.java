@@ -28,24 +28,18 @@ public class AcountMapper {
         account.setCurrentBalance(domain.getCurrentBalance());
         account.setOpeningDate(domain.getOpeningDate());
         account.setAccountStatus(domain.getAccountStatus());
-        account.setProduct(productMapper.documentToModel(domain.getProduct()));
+        account.setTypeCurrency(domain.getTypeCurrency());
         AccountResponseCustomer customer = new AccountResponseCustomer();
         customer.setId(domain.getCustomer().getId());
         customer.setType(domain.getCustomer().getType());
         account.setCustomer(customer);
-        account.setTypeCurrency(domain.getTypeCurrency());
+        account.setProduct(productMapper.documentToModel(domain.getProduct()));
         if (Objects.nonNull(domain.getDebitCard())) {
             AccountResponseDebitCard debiCard = new AccountResponseDebitCard();
             debiCard.setId(domain.getDebitCard().getId());
             debiCard.setMainAccount(domain.getDebitCard().getMainAccount());
             account.setDebitCard(debiCard);
         }
-        account.setAmountApproved(domain.getAmountApproved());
-        account.setInterestRate(domain.getInterestRate());
-        account.setQuotas(domain.getQuotas());
-        account.setPaymentDate(domain.getPaymentDate());
-        account.setCreditLimit(domain.getCreditLimit());
-        account.setExpirationDate(domain.getExpirationDate());
         return account;
     }
 
@@ -56,57 +50,40 @@ public class AcountMapper {
         account.setCurrentBalance(dto.getCurrentBalance());
         account.setOpeningDate(dto.getOpeningDate());
         account.setAccountStatus(dto.getAccountStatus());
-        account.setProduct(productMapper.documentToModel(dto.getProduct()));
+        account.setTypeCurrency(dto.getTypeCurrency());
         AccountResponseCustomer customer = new AccountResponseCustomer();
         customer.setId(dto.getCustomer().getId());
         customer.setType(dto.getCustomer().getType());
         account.setCustomer(customer);
+        account.setProduct(productMapper.documentToModel(dto.getProduct()));
+        if (Objects.nonNull(dto.getDebitCard())) {
+            AccountResponseDebitCard debiCard = new AccountResponseDebitCard();
+            debiCard.setId(dto.getDebitCard().getId());
+            debiCard.setMainAccount(dto.getDebitCard().getMainAccount());
+            debiCard.setOrder(dto.getDebitCard().getOrder());
+            account.setDebitCard(debiCard);
+        }
         account.setTransactions(
                 dto.getTransactions()
                         .stream()
                         .map(transaction -> transactionMapper.documentToModel(transaction))
                         .toList()
         );
-        account.setTypeCurrency(dto.getTypeCurrency());
-        if (Objects.nonNull(dto.getDebitCard())) {
-            AccountResponseDebitCard debiCard = new AccountResponseDebitCard();
-            debiCard.setId(dto.getDebitCard().getId());
-            debiCard.setMainAccount(dto.getDebitCard().getMainAccount());
-            account.setDebitCard(debiCard);
-        }
-        account.setAmountApproved(dto.getAmountApproved());
-        account.setInterestRate(dto.getInterestRate());
-        account.setQuotas(dto.getQuotas());
-        account.setPaymentDate(dto.getPaymentDate());
-        account.setCreditLimit(dto.getCreditLimit());
-        account.setExpirationDate(dto.getExpirationDate());
         return account;
     }
 
     public Account modelToDocument(AccountRequest model) {
         Account account = new Account();
         account.setAccountNumber(model.getAccountNumber());
-        account.setProductId(model.getProductId());
         account.setCurrentBalance(model.getCurrentBalance());
         account.setOpeningDate(model.getOpeningDate());
-        account.setAccountStatus(model.getAccountStatus());
+        account.setAccountStatus(getAccountStatus(model.getAccountStatus()));
+        account.setTypeCurrency(getTypeCurrency(model.getTypeCurrency()));
         Customer customer = new Customer();
         customer.setId(model.getCustomer().getId());
-        customer.setType(model.getCustomer().getType());
+        customer.setType(getTypeCustomer(model.getCustomer().getType()));
         account.setCustomer(customer);
-        account.setTypeCurrency(getTypeCurrency(model.getTypeCurrency()));
-        if (Objects.nonNull(model.getDebitCard())) {
-            DebiCard debiCard = new DebiCard();
-            debiCard.setId(model.getDebitCard().getId());
-            debiCard.setMainAccount(model.getDebitCard().getMainAccount());
-            account.setDebitCard(debiCard);
-        }
-        account.setAmountApproved(model.getAmountApproved());
-        account.setInterestRate(model.getInterestRate());
-        account.setQuotas(model.getQuotas());
-        account.setPaymentDate(model.getPaymentDate());
-        account.setCreditLimit(model.getCreditLimit());
-        account.setExpirationDate(model.getExpirationDate());
+        account.setProductId(model.getProductId());
         return account;
     }
 
@@ -117,24 +94,19 @@ public class AcountMapper {
         account.setCurrentBalance(document.getCurrentBalance());
         account.setOpeningDate(document.getOpeningDate());
         account.setAccountStatus(document.getAccountStatus());
-        account.setProductId(document.getProductId());
+        account.setTypeCurrency(document.getTypeCurrency());
         Customer customer = new Customer();
         customer.setId(document.getCustomer().getId());
         customer.setType(document.getCustomer().getType());
         account.setCustomer(customer);
-        account.setTypeCurrency(document.getTypeCurrency());
+        account.setProductId(document.getProductId());
         if (Objects.nonNull(document.getDebitCard())) {
             DebiCard debiCard = new DebiCard();
             debiCard.setId(document.getDebitCard().getId());
             debiCard.setMainAccount(document.getDebitCard().getMainAccount());
+            debiCard.setOrder(document.getDebitCard().getOrder());
             account.setDebitCard(debiCard);
         }
-        account.setAmountApproved(document.getAmountApproved());
-        account.setInterestRate(document.getInterestRate());
-        account.setQuotas(document.getQuotas());
-        account.setPaymentDate(document.getPaymentDate());
-        account.setCreditLimit(document.getCreditLimit());
-        account.setExpirationDate(document.getExpirationDate());
         return account;
     }
 
@@ -142,6 +114,20 @@ public class AcountMapper {
         return switch (typeCurrencyEnum) {
             case PEN -> "Soles";
             case USD -> "Dolares";
+        };
+    }
+
+    private String getAccountStatus(AccountRequest.AccountStatusEnum accountStatusEnum) {
+        return switch (accountStatusEnum) {
+            case A -> "Activa";
+            case I -> "Inactiva";
+        };
+    }
+
+    private String getTypeCustomer(AccountRequestCustomer.TypeEnum typeCustomerEnum) {
+        return switch (typeCustomerEnum) {
+            case P -> "Personal";
+            case E -> "Empresarial";
         };
     }
 }

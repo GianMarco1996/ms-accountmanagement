@@ -976,8 +976,10 @@ components:
           description: "Estado de la cuenta"
           type: string
           example: "Activa"
-        product:
-          $ref: '#/components/schemas/ProductResponse'
+        typeCurrency:
+          description: "Tipo de moneda"
+          type: string
+          example: "Soles"
         customer:
           type: object
           properties:
@@ -989,10 +991,8 @@ components:
               description: "Tipo de cliente de esta cuenta"
               type: string
               example: "Personal"
-        typeCurrency:
-          description: "Tipo de moneda"
-          type: string
-          example: "Soles"
+        product:
+          $ref: '#/components/schemas/ProductResponse'
         debitCard:
           type: object
           properties:
@@ -1004,33 +1004,10 @@ components:
               description: "Indicador si la cuenta relacionada a la tarjeta de débito es la principal"
               type: boolean
               example: true
-        amountApproved:
-          description: "Monto aprobado para el crédito"
-          type: number
-          format: double
-          example: 10000
-        interestRate:
-          description: "Tasa de interes"
-          type: number
-          format: double
-          example: 10000
-        quotas:
-          description: "Número de cuotas"
-          type: integer
-          example: 10
-        paymentDate:
-          description: "Fecha de pago"
-          type: string
-          example: "15 de cada mes"
-        creditLimit:
-          description: "Limite de crédito"
-          type: number
-          format: double
-          example: 10000
-        expirationDate:
-          description: "Fecha de vencimiento de la tarjeta"
-          type: string
-          example: "21/12/2029"
+            order:
+              description: "Orden en que la cuenta fue asociada a la tarjeta de débito"
+              type: integer
+              example: 1
     AccountDetailResponse:
       type: object
       properties:
@@ -1055,8 +1032,10 @@ components:
           description: "Estado de la cuenta"
           type: string
           example: "Activa"
-        product:
-          $ref: '#/components/schemas/ProductResponse'
+        typeCurrency:
+          description: "Tipo de moneda"
+          type: string
+          example: "Soles"
         customer:
           type: object
           properties:
@@ -1068,15 +1047,8 @@ components:
               description: "Tipo de cliente de esta cuenta"
               type: string
               example: "Personal"
-        transactions:
-          description: "Transacciones asociadas a esta cuenta"
-          type: array
-          items:
-            $ref: '#/components/schemas/TransactionResponse'
-        typeCurrency:
-          description: "Tipo de moneda"
-          type: string
-          example: "Soles"
+        product:
+          $ref: '#/components/schemas/ProductResponse'
         debitCard:
           type: object
           properties:
@@ -1088,33 +1060,15 @@ components:
               description: "Indicador si la cuenta relacionada a la tarjeta de débito es la principal"
               type: boolean
               example: true
-        amountApproved:
-          description: "Monto aprobado para el crédito"
-          type: number
-          format: double
-          example: 10000
-        interestRate:
-          description: "Tasa de interes"
-          type: number
-          format: double
-          example: 10000
-        quotas:
-          description: "Número de cuotas"
-          type: integer
-          example: 10
-        paymentDate:
-          description: "Fecha de pago"
-          type: string
-          example: "15 de cada mes"
-        creditLimit:
-          description: "Limite de crédito"
-          type: number
-          format: double
-          example: 10000
-        expirationDate:
-          description: "Fecha de vencimiento de la tarjeta"
-          type: string
-          example: "21/12/2029"
+            order:
+              description: "Orden en que la cuenta fue asociada a la tarjeta de débito"
+              type: integer
+              example: 1
+        transactions:
+          description: "Transacciones asociadas a esta cuenta"
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionResponse'
     AccountRequest:
       type: object
       required:
@@ -1122,9 +1076,9 @@ components:
         - currentBalance
         - openingDate
         - accountStatus
-        - productId
-        - customer
         - typeCurrency
+        - customer
+        - productId
       properties:
         accountNumber:
           description: "Numero de la cuenta"
@@ -1140,13 +1094,19 @@ components:
           type: string
           example: "21/12/2024"
         accountStatus:
-          description: "Estado de la cuenta"
+          description: "Estado de la cuenta: Activa(A), Inactiva(I)"
           type: string
-          example: "Activa"
-        productId:
-          description: "Id del producto a la que pertenece la cuenta"
+          example: "A"
+          enum:
+            - A
+            - I
+        typeCurrency:
+          description: "Tipo de moneda: Soles(PEN), Dolares(USD)"
           type: string
-          example: "6764c17cb1fa3cd77d0644d8"
+          example: "PEN"
+          enum:
+            - PEN
+            - USD
         customer:
           type: object
           properties:
@@ -1155,54 +1115,16 @@ components:
               type: string
               example: "6764c17cb1fa3cd77d0644d8"
             type:
-              description: "Tipo de cliente de esta cuenta"
+              description: "Tipo de cliente de esta cuenta: Personal(P) y Empresarial(E)"
               type: string
-              example: "Personal"
-        typeCurrency:
-          description: "Tipo de moneda: Soles(PEN), Dolares(USD)"
+              example: "P"
+              enum:
+                - P
+                - E
+        productId:
+          description: "Id del producto a la que pertenece la cuenta"
           type: string
-          example: "PEN"
-          enum:
-            - PEN
-            - USD
-        debitCard:
-          type: object
-          properties:
-            id:
-              description: "Id de la tarjeta de débito"
-              type: string
-              example: "6764c17cb1fa3cd77d0644d8"
-            mainAccount:
-              description: "Indicador si la cuenta relacionada a la tarjeta de débito es la principal"
-              type: boolean
-              example: true
-        amountApproved:
-          description: "Monto aprobado para el crédito"
-          type: number
-          format: double
-          example: 10000
-        interestRate:
-          description: "Tasa de interes"
-          type: number
-          format: double
-          example: 10000
-        quotas:
-          description: "Número de cuotas"
-          type: integer
-          example: 10
-        paymentDate:
-          description: "Fecha de pago"
-          type: string
-          example: "15 de cada mes"
-        creditLimit:
-          description: "Limite de crédito"
-          type: number
-          format: double
-          example: 10000
-        expirationDate:
-          description: "Fecha de vencimiento de la tarjeta"
-          type: string
-          example: "21/12/2029"
+          example: "6764c17cb1fa3cd77d0644d8"
     AccountDebitCard:
       type: object
       properties:

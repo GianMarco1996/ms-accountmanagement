@@ -19,27 +19,15 @@ public class AccountDTO {
 
     private String accountStatus;
 
+    private String typeCurrency;
+
+    private Customer customer;
+
     private String productId;
 
     private Product product;
 
-    private Customer customer;
-
-    private List<Transaction> transactions = new ArrayList<>();
-
-    private String typeCurrency;
-
     private DebiCard debitCard;
 
-    private Double amountApproved;
-
-    private Double interestRate;
-
-    private Integer quotas;
-
-    private String paymentDate;
-
-    private Double creditLimit;
-
-    private String expirationDate;
+    private List<Transaction> transactions = new ArrayList<>();
 }
