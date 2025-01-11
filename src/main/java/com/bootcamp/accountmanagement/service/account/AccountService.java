@@ -14,12 +14,10 @@ public interface AccountService {
     Mono<AccountDTO> getAccountTransactions(String id);
 
     Mono<Account> registerAccount(Mono<Account> account);
-
-    Mono<Account> updateAccount(String id, Mono<Account> account);
-
-    Mono<Void> removeAccount(String id);
     
     Mono<Account> updateBalance(String id, double amount, boolean condition);
 
     Mono<Account> associateDebitCard(String id, Mono<AccountDebitCard> accountDebitCard);
+
+    Mono<String> updateAccountStatus(String id, String status);
 }

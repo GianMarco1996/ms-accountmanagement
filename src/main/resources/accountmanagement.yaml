@@ -161,12 +161,13 @@ paths:
                   message:
                     type: string
                     example: "Error en el servidor."
+  /account/accountStatus/{id}:
     put:
       tags:
         - account
-      summary: Actualiza una cuenta de un cliente del banco
-      operationId: updateAccount
-      description: Actualiza una cuenta por ID
+      summary: Cambia el estado de una cuenta bancaria
+      operationId: updateAccountStatus
+      description: Actualiza el estado de una cuenta bancaria por ID
       parameters:
         - name: id
           in: path
@@ -175,11 +176,13 @@ paths:
           schema:
             type: string
             example: "6764c17cb1fa3cd77d0644d8"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AccountRequest"
+        - name: accountStatus
+          description: "Indica el estado para la cuenta: Activa(A), Inactiva(I)"
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "A"
       responses:
         "200":
           description: "Operación finalizada correctamente"
@@ -190,30 +193,6 @@ paths:
                   message:
                     type: string
                     example: "Se actualizo de forma exitosa."
-        "500":
-          description: "Errores técnicos"
-          content:
-            application/json:
-              schema:
-                properties:
-                  message:
-                    type: string
-                    example: "Error en el servidor."
-    delete:
-      tags:
-        - account
-      summary: Elimina una cuenta de un cliente del banco
-      operationId: removeAccount
-      description: Elimina una cuenta por ID
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: ID de la cuenta
-          schema:
-            type: string
-            example: "6764c17cb1fa3cd77d0644d8"
-      responses:
         "500":
           description: "Errores técnicos"
           content:

@@ -92,19 +92,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Mono<Account> updateAccount(String id, Mono<Account> account) {
-        return accountRepository.findById(id)
-                .flatMap(a -> account)
-                .doOnNext(e -> e.setId(id))
-                .flatMap(accountRepository::save);
-    }
-
-    @Override
-    public Mono<Void> removeAccount(String id)  {
-        return accountRepository.deleteById(id);
-    }
-
-    @Override
     public Mono<Account> updateBalance(String id, double amount, boolean condition) {
         return accountRepository.findById(id)
                 .map(a -> {
@@ -128,6 +115,27 @@ public class AccountServiceImpl implements AccountService {
                 .flatMap(account -> updateDebitCard(account, accountDebitCard))
                 .doOnNext(e -> e.setId(id))
                 .flatMap(accountRepository::save);
+    }
+
+    @Override
+    public Mono<String> updateAccountStatus(String id, String status) {
+        return Mono.just(status)
+                .filter(s -> s.equals("A") || s.equals("I"))
+                .switchIfEmpty(Mono.error(new Exception("El estado ingresado es el incorrecto")))
+                .flatMap(s -> accountRepository.findById(id)
+                        .map(account -> {
+                            if (s.equals("A")) {
+                                account.setAccountStatus("Activa");
+                            } else {
+                                account.setAccountStatus("Inactiva");
+                            }
+                            return account;
+                        })
+                        .flatMap(accountRepository::save)
+                        .flatMap(w -> status.equals("A")
+                                ? Mono.just("Su cuenta bancaria fue activada exitosamente")
+                                : Mono.just("Su cuenta bancaria fue desactivada"))
+                );
     }
 
     private Mono<Account> registerAccountPersonal(Account account, Product product) {

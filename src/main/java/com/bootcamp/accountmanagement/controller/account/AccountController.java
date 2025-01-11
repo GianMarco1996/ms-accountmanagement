@@ -8,7 +8,6 @@ import com.bootcamp.accountmanagement.model.AccountRequest;
 import com.bootcamp.accountmanagement.model.AccountResponse;
 import com.bootcamp.accountmanagement.service.account.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
@@ -58,16 +57,8 @@ public class AccountController implements AccountApi {
     }
 
     @Override
-    public Mono<ResponseEntity<Void>> removeAccount(String id, ServerWebExchange exchange) {
-        return accountService.removeAccount(id)
-                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
-                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    @Override
-    public Mono<ResponseEntity<Object>> updateAccount(String id, Mono<AccountRequest> accountRequest, ServerWebExchange exchange) {
-        return accountService.updateAccount(id,
-                        accountRequest.map(account -> accountMapper.modelToDocument(account)))
+    public Mono<ResponseEntity<Object>> updateAccountStatus(String id, String accountStatus, ServerWebExchange exchange) {
+        return accountService.updateAccountStatus(id, accountStatus)
                 .map(ResponseEntity::ok);
     }
 }
