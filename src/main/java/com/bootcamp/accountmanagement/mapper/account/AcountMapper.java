@@ -38,6 +38,7 @@ public class AcountMapper {
             AccountResponseDebitCard debiCard = new AccountResponseDebitCard();
             debiCard.setId(domain.getDebitCard().getId());
             debiCard.setMainAccount(domain.getDebitCard().getMainAccount());
+            debiCard.setOrder(domain.getDebitCard().getOrder());
             account.setDebitCard(debiCard);
         }
         return account;

@@ -100,7 +100,6 @@ public class AccountServiceImpl implements AccountService {
                     } else {
                         if (amount > a.getCurrentBalance()) {
                             throw new IllegalArgumentException("No tiene saldo suficiente para realizar la operación.");
-                            //Mono.error(new Exception("No tiene saldo suficiente para realizar la operación."));
                         }
                         a.setCurrentBalance(a.getCurrentBalance() - amount);
                     }
@@ -112,6 +111,9 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Mono<Account> associateDebitCard(String id, Mono<AccountDebitCard> accountDebitCard) {
         return accountRepository.findById(id)
+                .flatMap(account -> Objects.isNull(account.getDebitCard())
+                        ? Mono.just(account)
+                        : Mono.error(new Exception("La cuenta ya se encuentra asociada a una tarjeta de débito")))
                 .flatMap(account -> updateDebitCard(account, accountDebitCard))
                 .doOnNext(e -> e.setId(id))
                 .flatMap(accountRepository::save);
@@ -158,12 +160,18 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private Mono<Account> updateDebitCard(Account account, Mono<AccountDebitCard> accountDebitCard) {
-        return accountDebitCard.flatMap(dc -> {
-            DebiCard debiCard = new DebiCard();
-            debiCard.setId(dc.getId());
-            debiCard.setMainAccount(dc.getMainAccount());
-            account.setDebitCard(debiCard);
-            return Mono.just(account);
-        });
+        return accountDebitCard.flatMap(dc ->
+                accountRepository.findAccountByCustomerId(account.getCustomer().getId())
+                        .filter(acc -> Objects.nonNull(acc.getDebitCard()))
+                        .count()
+                        .map(contador -> {
+                            DebiCard debiCard = new DebiCard();
+                            debiCard.setId(dc.getId());
+                            debiCard.setMainAccount(dc.getMainAccount());
+                            debiCard.setOrder((int) (contador + 1));
+                            account.setDebitCard(debiCard);
+                            return account;
+                        })
+        );
     }
 }
