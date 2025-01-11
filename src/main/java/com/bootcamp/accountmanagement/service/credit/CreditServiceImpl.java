@@ -59,7 +59,12 @@ public class CreditServiceImpl implements CreditService {
         return credit.flatMap(c -> productRepository.findById(c.getProductId())
                 .filter(p -> p.getCategory().equals("Personal") || p.getCategory().equals("Empresarial"))
                 .switchIfEmpty(Mono.error(new Exception("El id del producto no pertenece a un crédito")))
-                .flatMap(p -> creditRepository.save(c))
+                .flatMap(p -> c.getCustomer().getType().equals("Empresarial")
+                        ? creditRepository.save(c)
+                        : Mono.just(c).flatMap(cre -> creditRepository.findCreditByCustomerId(cre.getCustomer().getId())
+                            .switchIfEmpty(creditRepository.save(c))
+                            .flatMap(cr -> Mono.error(new Exception("El cliente de tipo Persona ya cuenta con un crédito")))
+                ))
         );
     }
 

@@ -1414,9 +1414,12 @@ components:
               type: string
               example: "6764c17cb1fa3cd77d0644d8"
             type:
-              description: "Tipo de cliente de esta tarjeta"
+              description: "Tipo de cliente de esta tarjeta: Personal(P) y Empresarial(E)"
               type: string
-              example: "Personal"
+              example: "P"
+              enum:
+                - P
+                - E
         typeCurrency:
           description: "Tipo de moneda: Soles(PEN), Dolares(USD)"
           type: string
@@ -1685,9 +1688,12 @@ components:
               type: string
               example: "6764c17cb1fa3cd77d0644d8"
             type:
-              description: "Tipo de cliente de este crédito"
+              description: "Tipo de cliente de este crédito: Personal(P) y Empresarial(E)"
               type: string
-              example: "Personal"
+              example: "P"
+              enum:
+                - P
+                - E
         productId:
           description: "Id del producto a la que pertenece el crédito"
           type: string

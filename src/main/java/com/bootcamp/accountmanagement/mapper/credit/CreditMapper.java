@@ -118,7 +118,7 @@ public class CreditMapper {
         credit.setPaymentDate(model.getPaymentDate());
         Customer customer = new Customer();
         customer.setId(model.getCustomer().getId());
-        customer.setType(model.getCustomer().getType());
+        customer.setType(getCustomerType(model.getCustomer().getType()));
         credit.setCustomer(customer);
         credit.setProductId(model.getProductId());
         return credit;
@@ -135,6 +135,13 @@ public class CreditMapper {
         return switch (typeCurrencyEnum) {
             case PEN -> "Soles";
             case USD -> "Dolares";
+        };
+    }
+
+    private String getCustomerType(CreditRequestCustomer.TypeEnum customerTypeEnum) {
+        return switch (customerTypeEnum) {
+            case P -> "Personal";
+            case E -> "Empresarial";
         };
     }
 }

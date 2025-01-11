@@ -2,7 +2,11 @@ package com.bootcamp.accountmanagement.mapper.card;
 
 import com.bootcamp.accountmanagement.mapper.product.ProductMapper;
 import com.bootcamp.accountmanagement.mapper.transaction.TransactionMapper;
-import com.bootcamp.accountmanagement.model.*;
+import com.bootcamp.accountmanagement.model.CardDetailResponse;
+import com.bootcamp.accountmanagement.model.CardRequest;
+import com.bootcamp.accountmanagement.model.CardRequestCustomer;
+import com.bootcamp.accountmanagement.model.CardResponse;
+import com.bootcamp.accountmanagement.model.CardResponseCustomer;
 import com.bootcamp.accountmanagement.model.account.Customer;
 import com.bootcamp.accountmanagement.model.card.Card;
 import com.bootcamp.accountmanagement.model.card.CardDTO;
@@ -103,7 +107,7 @@ public class CardMapper {
         card.setProductId(model.getProductId());
         Customer customer = new Customer();
         customer.setId(model.getCustomer().getId());
-        customer.setType(model.getCustomer().getType());
+        customer.setType(getCustomerType(model.getCustomer().getType()));
         card.setCustomer(customer);
         card.setTypeCurrency(getTypeCurrency(model.getTypeCurrency()));
         card.setCardStatus(getCardStatus(model.getCardStatus()));
@@ -144,6 +148,13 @@ public class CardMapper {
         return switch (typeCurrencyEnum) {
             case PEN -> "Soles";
             case USD -> "Dolares";
+        };
+    }
+
+    private String getCustomerType(CardRequestCustomer.TypeEnum customerTypeEnum) {
+        return switch (customerTypeEnum) {
+            case P -> "Personal";
+            case E -> "Empresarial";
         };
     }
 }
