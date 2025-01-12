@@ -4,6 +4,8 @@ import com.bootcamp.accountmanagement.messaging.KafkaTransaction;
 import com.bootcamp.accountmanagement.model.transaction.Transaction;
 import com.bootcamp.accountmanagement.repository.transaction.TransactionRepository;
 import com.bootcamp.accountmanagement.service.account.AccountService;
+import com.bootcamp.accountmanagement.service.redis.RedisService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -21,6 +23,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private AccountService accountService;
+
+    @Autowired
+    private RedisService redisService;
 
     @Override
     public Flux<Transaction> getTransactions() {
@@ -56,7 +61,7 @@ public class TransactionServiceImpl implements TransactionService {
         return Mono.when(transactions.stream()
                         .map(tra -> {
                             if (Objects.isNull(tra.getDebitCardId())) {
-                                return transactionRepository.save(getKafkaModelToDocument(tra));
+                                return saveTransaction(getKafkaModelToDocument(tra));
                             } else {
                                 return Mono.just(getKafkaModelToDocument(tra));
                             }
@@ -90,5 +95,25 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setDescription(kafkaTransaction.getDescription());
         transaction.setMobile(kafkaTransaction.getMobile());
         return transaction;
+    }
+
+    private Mono<Transaction> saveTransaction(Transaction transaction) {
+        return transactionRepository.save(transaction)
+                .flatMap(tra -> transactionRepository.findAll()
+                                .filter(t -> Objects.nonNull(t.getMobile()))
+                                .collectList()
+                                .map(t -> {
+                                    registerRedis(t);
+                                    return tra;
+                                })
+                );
+    }
+
+    private void registerRedis(List<Transaction> transactions) {
+        try {
+            redisService.registerTransactionsRedis(transactions);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
