@@ -1,5 +1,6 @@
 package com.bootcamp.accountmanagement.service.transaction;
 
+import com.bootcamp.accountmanagement.messaging.KafkaTransaction;
 import com.bootcamp.accountmanagement.model.transaction.Transaction;
 import com.bootcamp.accountmanagement.repository.transaction.TransactionRepository;
 import com.bootcamp.accountmanagement.service.account.AccountService;
@@ -8,7 +9,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -48,6 +51,20 @@ public class TransactionServiceImpl implements TransactionService {
         });
     }
 
+    @Override
+    public Mono<String> registerMessage(List<KafkaTransaction> transactions) {
+        return Mono.when(transactions.stream()
+                        .map(tra -> {
+                            if (Objects.isNull(tra.getDebitCardId())) {
+                                return transactionRepository.save(getKafkaModelToDocument(tra));
+                            } else {
+                                return Mono.just(getKafkaModelToDocument(tra));
+                            }
+                        })
+                        .collect(Collectors.toList())
+        ).then(Mono.just("Yanki realizado"));
+    }
+
     private Transaction validateTransactionCategoryAndTypeForTheAccount(Transaction transaction) {
         if (Objects.nonNull(transaction.getCategory())) {
             if (transaction.getType().equals("Pago")
@@ -61,6 +78,17 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new IllegalArgumentException("Los movimientos tienen que tener una categoría");
             }
         }
+        return transaction;
+    }
+
+    private Transaction getKafkaModelToDocument(KafkaTransaction kafkaTransaction) {
+        Transaction transaction = new Transaction();
+        transaction.setCategory(kafkaTransaction.getCategory());
+        transaction.setType(kafkaTransaction.getType());
+        transaction.setAmount(kafkaTransaction.getAmount());
+        transaction.setTransactionDate(kafkaTransaction.getTransactionDate());
+        transaction.setDescription(kafkaTransaction.getDescription());
+        transaction.setMobile(kafkaTransaction.getMobile());
         return transaction;
     }
 }

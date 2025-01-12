@@ -25,4 +25,6 @@ public class Transaction {
     private String transactionDate;
 
     private String description;
+
+    private String mobile;
 }
