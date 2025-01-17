@@ -29,4 +29,8 @@ public class Product {
     private Double commissionMaintenance;
 
     private Integer movementDay;
+
+    private Double pricePurchase;
+
+    private Double priceSale;
 }

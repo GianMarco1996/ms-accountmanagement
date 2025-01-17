@@ -2,11 +2,14 @@ package com.bootcamp.accountmanagement.service.product;
 
 import com.bootcamp.accountmanagement.model.product.Product;
 import com.bootcamp.accountmanagement.repository.product.ProductRepository;
+import com.bootcamp.accountmanagement.service.redis.product.ProductRedisService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -14,6 +17,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private ProductRedisService productRedisService;
 
     @Override
     public Flux<Product> getProducts() {
@@ -28,7 +34,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Mono<Product> registerProduct(Mono<Product> product) {
         return product.map(this::validateProduct)
-                .flatMap(productRepository::insert);
+                .flatMap(productRepository::insert)
+                .flatMap(pro -> productRepository.findAll()
+                        .collectList()
+                        .map(p -> {
+                            registerRedis(p);
+                            return pro;
+                        })
+                );
     }
 
     @Override
@@ -36,7 +49,14 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findById(id)
                 .flatMap(p -> product)
                 .doOnNext(e -> e.setId(id))
-                .flatMap(productRepository::save);
+                .flatMap(productRepository::save)
+                .flatMap(pro -> productRepository.findAll()
+                        .collectList()
+                        .map(p -> {
+                            registerRedis(p);
+                            return pro;
+                        })
+                );
     }
 
     @Override
@@ -63,5 +83,13 @@ public class ProductServiceImpl implements ProductService {
             }
         }
         return product;
+    }
+
+    private void registerRedis(List<Product> products) {
+        try {
+            productRedisService.registerProductsRedis(products);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

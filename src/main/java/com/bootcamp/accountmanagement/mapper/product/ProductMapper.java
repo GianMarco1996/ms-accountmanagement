@@ -21,6 +21,8 @@ public class ProductMapper {
         product.setMonthlyMovements(domain.getMonthlyMovements());
         product.setCommissionMaintenance(domain.getCommissionMaintenance());
         product.setMovementDay(domain.getMovementDay());
+        product.setPricePurchase(domain.getPricePurchase());
+        product.setPriceSale(domain.getPriceSale());
         return product;
     }
 
@@ -37,6 +39,8 @@ public class ProductMapper {
         product.setMonthlyMovements(model.getMonthlyMovements());
         product.setCommissionMaintenance(model.getCommissionMaintenance());
         product.setMovementDay(model.getMovementDay());
+        product.setPricePurchase(model.getPricePurchase());
+        product.setPriceSale(model.getPriceSale());
         return product;
     }
 
@@ -56,6 +60,7 @@ public class ProductMapper {
             case E -> "Empresarial";
             case TC -> "Tarjeta crédito";
             case TD -> "Tarjeta débito";
+            case B -> "BootCoin";
         };
     }
 

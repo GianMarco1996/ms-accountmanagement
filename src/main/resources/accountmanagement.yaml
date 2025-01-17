@@ -241,7 +241,6 @@ paths:
                   message:
                     type: string
                     example: "Error en el servidor."
-
   /account/bankTransfers/{id}:
     put:
       tags:
@@ -281,7 +280,6 @@ paths:
                   message:
                     type: string
                     example: "Error en el servidor."
-
   /transaction/list:
     get:
       tags:
@@ -1166,6 +1164,16 @@ components:
           description: "Día del movimiento para el Plazo Fijo"
           type: integer
           example: 30
+        pricePurchase:
+          description: "Precio de compra del BootCoin"
+          type: number
+          format: double
+          example: 3.14
+        priceSale:
+          description: "Precio de venta del BootCoin"
+          type: number
+          format: double
+          example: 3.20
     ProductRequest:
       type: object
       required:
@@ -1184,13 +1192,14 @@ components:
             - P
             - A
         category:
-          description: "Categoría para el tipo de producto; para los Pasivos: Ahorro(A), Cuenta corriente(CC), Plazo fijo(PF), Tarjeta débito(TD) y para los Activos: Personal(P), Empresarial(E), Tarjeta crédito(TC)"
+          description: "Categoría para el tipo de producto; para los Pasivos: Ahorro(A), Cuenta corriente(CC), Plazo fijo(PF), BootCoin(B) Tarjeta débito(TD) y para los Activos: Personal(P), Empresarial(E), Tarjeta crédito(TC)"
           type: string
           example: "TC"
           enum:
             - A
             - CC
             - PF
+            - B
             - P
             - E
             - TC
@@ -1219,6 +1228,16 @@ components:
           description: "Día del movimiento para el Plazo Fijo"
           type: integer
           example: 30
+        pricePurchase:
+          description: "Precio de compra del BootCoin"
+          type: number
+          format: double
+          example: 3.14
+        priceSale:
+          description: "Precio de venta del BootCoin"
+          type: number
+          format: double
+          example: 3.20
     CardResponse:
       type: object
       properties:

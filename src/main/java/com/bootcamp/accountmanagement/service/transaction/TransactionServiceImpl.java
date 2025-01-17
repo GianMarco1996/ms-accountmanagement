@@ -4,7 +4,7 @@ import com.bootcamp.accountmanagement.messaging.KafkaTransaction;
 import com.bootcamp.accountmanagement.model.transaction.Transaction;
 import com.bootcamp.accountmanagement.repository.transaction.TransactionRepository;
 import com.bootcamp.accountmanagement.service.account.AccountService;
-import com.bootcamp.accountmanagement.service.redis.RedisService;
+import com.bootcamp.accountmanagement.service.redis.transaction.RedisService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

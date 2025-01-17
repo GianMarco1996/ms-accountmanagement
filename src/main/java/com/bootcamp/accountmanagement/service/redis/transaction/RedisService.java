@@ -1,4 +1,4 @@
-package com.bootcamp.accountmanagement.service.redis;
+package com.bootcamp.accountmanagement.service.redis.transaction;
 
 import com.bootcamp.accountmanagement.model.transaction.Transaction;
 import com.fasterxml.jackson.core.JsonProcessingException;
